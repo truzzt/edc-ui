@@ -22,6 +22,8 @@ the detailed section referring to by linking pull requests or issues.
 
 #### Fixed
 
+- Fix Dashboard chart colors based on theme
+
 ## [v0.0.1-milestone-8-sovity8] 23.06.2023
 
 ### Overview

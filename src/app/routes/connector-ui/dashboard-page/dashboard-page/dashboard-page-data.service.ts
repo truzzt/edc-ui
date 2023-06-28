@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, combineLatest, merge, of, scan} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {ActiveFeatureSet} from '../../../../core/config/active-feature-set';
 import {CatalogApiUrlService} from '../../../../core/services/api/catalog-api-url.service';
 import {ContractOfferService} from '../../../../core/services/api/contract-offer.service';
 import {
@@ -22,6 +23,7 @@ import {DashboardPageData, defaultDashboardData} from './dashboard-page-data';
 @Injectable({providedIn: 'root'})
 export class DashboardPageDataService {
   constructor(
+    private activeFeatureSet: ActiveFeatureSet,
     private catalogBrowserService: ContractOfferService,
     private contractDefinitionService: ContractDefinitionService,
     private contractAgreementService: ContractAgreementService,
@@ -151,9 +153,15 @@ export class DashboardPageDataService {
     );
 
     const colorsByState = new Map<string, string>();
-    colorsByState.set('IN_PROGRESS', '#7eb0d5');
-    colorsByState.set('ERROR', '#fd7f6f');
-    colorsByState.set('COMPLETED', '#b2e061');
+    if (this.activeFeatureSet.hasMdsFields()) {
+      colorsByState.set('IN_PROGRESS', '#FFFF00');
+      colorsByState.set('ERROR', '#FFA500');
+      colorsByState.set('COMPLETED', '#9ACD32');
+    } else {
+      colorsByState.set('IN_PROGRESS', '#7eb0d5');
+      colorsByState.set('ERROR', '#fd7f6f');
+      colorsByState.set('COMPLETED', '#b2e061');
+    }
     const defaultColor = '#bd7ebe';
 
     const amountsByState = states.map(

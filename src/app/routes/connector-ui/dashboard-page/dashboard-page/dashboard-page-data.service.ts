@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {Observable, combineLatest, merge, of, scan} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {ActiveFeatureSet} from '../../../../core/config/active-feature-set';
+import {APP_CONFIG, AppConfig} from '../../../../core/config/app-config';
 import {CatalogApiUrlService} from '../../../../core/services/api/catalog-api-url.service';
 import {ContractOfferService} from '../../../../core/services/api/contract-offer.service';
 import {
@@ -12,7 +12,9 @@ import {
   TransferProcessDto,
   TransferProcessService,
 } from '../../../../core/services/api/legacy-managent-api-client';
-import {ConnectorInfoPropertyGridGroupBuilder} from '../../../../core/services/connector-info-property-grid-group-builder';
+import {
+  ConnectorInfoPropertyGridGroupBuilder
+} from '../../../../core/services/connector-info-property-grid-group-builder';
 import {LastCommitInfoService} from '../../../../core/services/last-commit-info.service';
 import {Fetched} from '../../../../core/services/models/fetched';
 import {TransferProcessStates} from '../../../../core/services/models/transfer-process-states';
@@ -20,10 +22,11 @@ import {TransferProcessUtils} from '../../../../core/services/transfer-process-u
 import {DonutChartData} from '../dashboard-donut-chart/donut-chart-data';
 import {DashboardPageData, defaultDashboardData} from './dashboard-page-data';
 
+
 @Injectable({providedIn: 'root'})
 export class DashboardPageDataService {
   constructor(
-    private activeFeatureSet: ActiveFeatureSet,
+    @Inject(APP_CONFIG) private config: AppConfig,
     private catalogBrowserService: ContractOfferService,
     private contractDefinitionService: ContractDefinitionService,
     private contractAgreementService: ContractAgreementService,
@@ -34,7 +37,8 @@ export class DashboardPageDataService {
     private transferProcessUtils: TransferProcessUtils,
     private lastCommitInfoService: LastCommitInfoService,
     private connectorInfoPropertyGridGroupBuilder: ConnectorInfoPropertyGridGroupBuilder,
-  ) {}
+  ) {
+  }
 
   /**
    * Fetch {@link DashboardPageData}.
@@ -153,15 +157,10 @@ export class DashboardPageDataService {
     );
 
     const colorsByState = new Map<string, string>();
-    if (this.activeFeatureSet.hasMdsFields()) {
-      colorsByState.set('IN_PROGRESS', '#FFFF00');
-      colorsByState.set('ERROR', '#FFA500');
-      colorsByState.set('COMPLETED', '#9ACD32');
-    } else {
-      colorsByState.set('IN_PROGRESS', '#7eb0d5');
-      colorsByState.set('ERROR', '#fd7f6f');
-      colorsByState.set('COMPLETED', '#b2e061');
-    }
+    colorsByState.set('IN_PROGRESS', this.config.chartColorNeutral);
+    colorsByState.set('ERROR', this.config.chartColorFailure);
+    colorsByState.set('COMPLETED', this.config.chartColorSuccess);
+
     const defaultColor = '#bd7ebe';
 
     const amountsByState = states.map(

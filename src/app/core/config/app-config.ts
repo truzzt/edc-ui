@@ -25,6 +25,9 @@ export interface AppConfig {
   brandFaviconSrc: string;
   brandLogoSrc: string;
   brandLogoStyle: string;
+  chartColorNeutral: string;
+  chartColorSuccess: string;
+  chartColorFailure: string;
 
   // EDC Backend Endpoints
   connectorEndpoint: string;

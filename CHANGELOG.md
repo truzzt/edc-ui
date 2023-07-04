@@ -26,6 +26,8 @@ the detailed section referring to by linking pull requests or issues.
 
 #### Fixed
 
+- Chart colours are now theme-based.
+
 - Fix Dashboard chart colors based on theme
 
 ## [v0.0.1-milestone-8-sovity8] 23.06.2023

@@ -15,7 +15,7 @@ export const MDS_THEME: EdcUiThemeConfig = {
   brandFaviconSrc: '/assets/images/mds_favicon.ico',
   brandLogoSrc: '/assets/images/mds_logo.svg',
   brandLogoStyle: 'height: 57px; margin-top: 5px; margin-left: 5px;',
-  chartColorNeutral: '#FFFF00',
-  chartColorSuccess: '#FFA500',
-  chartColorFailure: '#9ACD32',
+  chartColorNeutral: '#ffff18',
+  chartColorSuccess: '#9ACD32',
+  chartColorFailure: '#FFA500',
 };

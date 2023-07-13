@@ -1,23 +1,21 @@
-import {Injectable} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {CatalogContractOffer} from '@sovity.de/broker-server-client';
-import {ActiveFeatureSet} from '../../../core/config/active-feature-set';
-import {Policy} from '../../../core/services/api/legacy-managent-api-client';
-import {AssetProperties} from '../../../core/services/asset-properties';
-import {Asset} from '../../../core/services/models/asset';
-import {BrokerDataOffer} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
-import {ContractAgreementCardMapped} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
-import {JsonDialogComponent} from '../../json-dialog/json-dialog/json-dialog.component';
-import {JsonDialogData} from '../../json-dialog/json-dialog/json-dialog.data';
-import {PropertyGridGroup} from '../../property-grid/property-grid-group/property-grid-group';
-import {PropertyGridField} from '../../property-grid/property-grid/property-grid-field';
-import {PropertyGridFieldService} from '../../property-grid/property-grid/property-grid-field.service';
-import {formatDateAgo} from '../../ui-elements/ago/formatDateAgo';
-import {
-  getOnlineStatusColor,
-  getOnlineStatusIcon,
-} from '../icon-with-online-status/online-status-utils';
-import {getLegacyPolicy} from './policy-utils';
+import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { CatalogContractOffer } from '@sovity.de/broker-server-client';
+import { ActiveFeatureSet } from '../../../core/config/active-feature-set';
+import { Policy } from '../../../core/services/api/legacy-managent-api-client';
+import { AssetProperties } from '../../../core/services/asset-properties';
+import { Asset } from '../../../core/services/models/asset';
+import { BrokerDataOffer } from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
+import { ContractAgreementCardMapped } from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
+import { JsonDialogComponent } from '../../json-dialog/json-dialog/json-dialog.component';
+import { JsonDialogData } from '../../json-dialog/json-dialog/json-dialog.data';
+import { PropertyGridGroup } from '../../property-grid/property-grid-group/property-grid-group';
+import { PropertyGridField } from '../../property-grid/property-grid/property-grid-field';
+import { PropertyGridFieldService } from '../../property-grid/property-grid/property-grid-field.service';
+import { formatDateAgo } from '../../ui-elements/ago/formatDateAgo';
+import { getOnlineStatusColor, getOnlineStatusIcon } from '../icon-with-online-status/online-status-utils';
+import { getLegacyPolicy } from './policy-utils';
+
 
 @Injectable()
 export class AssetPropertyGridGroupBuilder {
@@ -86,6 +84,26 @@ export class AssetPropertyGridGroupBuilder {
 
     if (this.activeFeatureSet.hasMdsFields()) {
       fields.push(...this.buildMdsProperties(asset, true));
+    }
+
+    if (
+      asset.httpProxyMethod != null ||
+      asset.httpProxyBody != null ||
+      asset.httpProxyPath != null ||
+      asset.httpProxyQueryParams != null
+    ) {
+      let showDetailsObject = {httpProxyMethod: asset.httpProxyPath};
+      fields.push({
+        icon: '',
+        label: 'Parameterization',
+        text: 'Show Details',
+        onclick: () =>
+          this.onShowDetailsClick(
+            `Parameterization Options`,
+            asset.name,
+            showDetailsObject,
+          ),
+      });
     }
 
     return {
@@ -173,6 +191,16 @@ export class AssetPropertyGridGroupBuilder {
       subtitle,
       icon: 'policy',
       objectForJson: policyDetails,
+    };
+    this.matDialog.open(JsonDialogComponent, {data});
+  }
+
+  onShowDetailsClick(title: string, subtitle: string, details: {}) {
+    const data: JsonDialogData = {
+      title,
+      subtitle,
+      icon: 'info',
+      objectForJson: details,
     };
     this.matDialog.open(JsonDialogComponent, {data});
   }

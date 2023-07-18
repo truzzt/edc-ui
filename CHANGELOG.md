@@ -16,6 +16,8 @@ the detailed section referring to by linking pull requests or issues.
 
 #### Added
 
+- Added viewing of parameterization options to asset details
+
 #### Changed
 
 #### Removed

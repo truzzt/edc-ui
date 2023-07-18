@@ -6,12 +6,12 @@ import {Policy} from '../../../core/services/api/legacy-managent-api-client';
 import {AssetProperties} from '../../../core/services/asset-properties';
 import {Asset} from '../../../core/services/models/asset';
 import {BrokerDataOffer} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
+import {ParameterizationDetailDialogComponent} from '../../../routes/connector-ui/asset-page/parameterization-detail-dialog/parameterization-detail-dialog.component';
 import {
-  ParameterizationDetailDialogComponent
-} from '../../../routes/connector-ui/asset-page/parameterization-detail-dialog/parameterization-detail-dialog.component';
-import {
-  ContractAgreementCardMapped
-} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
+  ParameterizationDetailDialogData,
+  assetParameterizationDetail,
+} from '../../../routes/connector-ui/asset-page/parameterization-detail-dialog/parameterization-detail-dialog.data';
+import {ContractAgreementCardMapped} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
 import {JsonDialogComponent} from '../../json-dialog/json-dialog/json-dialog.component';
 import {JsonDialogData} from '../../json-dialog/json-dialog/json-dialog.data';
 import {PropertyGridGroup} from '../../property-grid/property-grid-group/property-grid-group';
@@ -23,11 +23,6 @@ import {
   getOnlineStatusIcon,
 } from '../icon-with-online-status/online-status-utils';
 import {getLegacyPolicy} from './policy-utils';
-import {
-  assetParameterizationDetail,
-  ParameterizationDetailDialogData
-} from "../../../routes/connector-ui/asset-page/parameterization-detail-dialog/parameterization-detail-dialog.data";
-
 
 @Injectable()
 export class AssetPropertyGridGroupBuilder {
@@ -35,8 +30,7 @@ export class AssetPropertyGridGroupBuilder {
     private matDialog: MatDialog,
     private activeFeatureSet: ActiveFeatureSet,
     private propertyGridUtils: PropertyGridFieldService,
-  ) {
-  }
+  ) {}
 
   buildAssetPropertiesGroup(
     asset: Asset,
@@ -105,12 +99,13 @@ export class AssetPropertyGridGroupBuilder {
       asset.httpProxyPath != null ||
       asset.httpProxyQueryParams != null
     ) {
-
       let showDetailsObject = {
-        httpProxyMethod: asset.httpProxyMethod ? "Enabled" : "Disabled",
-        httpProxyBody: asset.httpProxyBody ? "Enabled" : "Disabled",
-        httpProxyPath: asset.httpProxyPath ? "Enabled" : "Disabled",
-        httpProxiedQueryParams: asset.httpProxyQueryParams ? "Enabled" : "Disabled"
+        httpProxyMethod: asset.httpProxyMethod ? 'Enabled' : 'Disabled',
+        httpProxyBody: asset.httpProxyBody ? 'Enabled' : 'Disabled',
+        httpProxyPath: asset.httpProxyPath ? 'Enabled' : 'Disabled',
+        httpProxiedQueryParams: asset.httpProxyQueryParams
+          ? 'Enabled'
+          : 'Disabled',
       };
       fields.push({
         icon: 'list',
@@ -214,7 +209,11 @@ export class AssetPropertyGridGroupBuilder {
     this.matDialog.open(JsonDialogComponent, {data});
   }
 
-  onShowDetailsClick(title: string, subtitle: string, details: assetParameterizationDetail) {
+  onShowDetailsClick(
+    title: string,
+    subtitle: string,
+    details: assetParameterizationDetail,
+  ) {
     const data: ParameterizationDetailDialogData = {
       title,
       subtitle,

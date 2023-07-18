@@ -6,7 +6,7 @@ import {ParameterizationDetailDialogData} from './parameterization-detail-dialog
   selector: 'app-parameterization-detail-dialog',
   templateUrl: './parameterization-detail-dialog.component.html',
 })
-export class ParameterizationDetailDialogComponent{
+export class ParameterizationDetailDialogComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ParameterizationDetailDialogData,
   ) {}

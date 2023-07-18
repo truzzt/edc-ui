@@ -19,10 +19,10 @@
       "http://w3id.org/mds#geoReferenceMethod": "my-geo-reference-method",
       "http://w3id.org/mds#transportMode": "Rail",
       "asset:prop:some-unsupported-property": "test",
-      "asset:prop:datasource:http:hints:proxyBody":"true",
-      "asset:prop:datasource:http:hints:proxyMethod":"true",
-      "asset:prop:datasource:http:hints:proxyPath":"false",
-      "asset:prop:datasource:http:hints:proxyQueryParams":"false"
+      "asset:prop:datasource:http:hints:proxyBody": "true",
+      "asset:prop:datasource:http:hints:proxyMethod": "true",
+      "asset:prop:datasource:http:hints:proxyPath": "false",
+      "asset:prop:datasource:http:hints:proxyQueryParams": "false"
     }
   },
   {

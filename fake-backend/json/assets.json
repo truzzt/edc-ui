@@ -21,8 +21,8 @@
       "asset:prop:some-unsupported-property": "test",
       "asset:prop:datasource:http:hints:proxyBody":"true",
       "asset:prop:datasource:http:hints:proxyMethod":"true",
-      "asset:prop:datasource:http:hints:proxyPath":"true",
-      "asset:prop:datasource:http:hints:proxyQueryParams":"true"
+      "asset:prop:datasource:http:hints:proxyPath":"false",
+      "asset:prop:datasource:http:hints:proxyQueryParams":"false"
     }
   },
   {

@@ -1,20 +1,32 @@
-import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { CatalogContractOffer } from '@sovity.de/broker-server-client';
-import { ActiveFeatureSet } from '../../../core/config/active-feature-set';
-import { Policy } from '../../../core/services/api/legacy-managent-api-client';
-import { AssetProperties } from '../../../core/services/asset-properties';
-import { Asset } from '../../../core/services/models/asset';
-import { BrokerDataOffer } from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
-import { ContractAgreementCardMapped } from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
-import { JsonDialogComponent } from '../../json-dialog/json-dialog/json-dialog.component';
-import { JsonDialogData } from '../../json-dialog/json-dialog/json-dialog.data';
-import { PropertyGridGroup } from '../../property-grid/property-grid-group/property-grid-group';
-import { PropertyGridField } from '../../property-grid/property-grid/property-grid-field';
-import { PropertyGridFieldService } from '../../property-grid/property-grid/property-grid-field.service';
-import { formatDateAgo } from '../../ui-elements/ago/formatDateAgo';
-import { getOnlineStatusColor, getOnlineStatusIcon } from '../icon-with-online-status/online-status-utils';
-import { getLegacyPolicy } from './policy-utils';
+import {Injectable} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {CatalogContractOffer} from '@sovity.de/broker-server-client';
+import {ActiveFeatureSet} from '../../../core/config/active-feature-set';
+import {Policy} from '../../../core/services/api/legacy-managent-api-client';
+import {AssetProperties} from '../../../core/services/asset-properties';
+import {Asset} from '../../../core/services/models/asset';
+import {BrokerDataOffer} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
+import {
+  ParameterizationDetailDialogComponent
+} from '../../../routes/connector-ui/asset-page/parameterization-detail-dialog/parameterization-detail-dialog.component';
+import {
+  ContractAgreementCardMapped
+} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
+import {JsonDialogComponent} from '../../json-dialog/json-dialog/json-dialog.component';
+import {JsonDialogData} from '../../json-dialog/json-dialog/json-dialog.data';
+import {PropertyGridGroup} from '../../property-grid/property-grid-group/property-grid-group';
+import {PropertyGridField} from '../../property-grid/property-grid/property-grid-field';
+import {PropertyGridFieldService} from '../../property-grid/property-grid/property-grid-field.service';
+import {formatDateAgo} from '../../ui-elements/ago/formatDateAgo';
+import {
+  getOnlineStatusColor,
+  getOnlineStatusIcon,
+} from '../icon-with-online-status/online-status-utils';
+import {getLegacyPolicy} from './policy-utils';
+import {
+  assetParameterizationDetail,
+  ParameterizationDetailDialogData
+} from "../../../routes/connector-ui/asset-page/parameterization-detail-dialog/parameterization-detail-dialog.data";
 
 
 @Injectable()
@@ -23,7 +35,8 @@ export class AssetPropertyGridGroupBuilder {
     private matDialog: MatDialog,
     private activeFeatureSet: ActiveFeatureSet,
     private propertyGridUtils: PropertyGridFieldService,
-  ) {}
+  ) {
+  }
 
   buildAssetPropertiesGroup(
     asset: Asset,
@@ -92,10 +105,16 @@ export class AssetPropertyGridGroupBuilder {
       asset.httpProxyPath != null ||
       asset.httpProxyQueryParams != null
     ) {
-      let showDetailsObject = {httpProxyMethod: asset.httpProxyPath};
+
+      let showDetailsObject = {
+        httpProxyMethod: asset.httpProxyMethod ? "Enabled" : "Disabled",
+        httpProxyBody: asset.httpProxyBody ? "Enabled" : "Disabled",
+        httpProxyPath: asset.httpProxyPath ? "Enabled" : "Disabled",
+        httpProxiedQueryParams: asset.httpProxyQueryParams ? "Enabled" : "Disabled"
+      };
       fields.push({
-        icon: '',
-        label: 'Parameterization',
+        icon: 'list',
+        label: 'Parameterization Options',
         text: 'Show Details',
         onclick: () =>
           this.onShowDetailsClick(
@@ -195,14 +214,14 @@ export class AssetPropertyGridGroupBuilder {
     this.matDialog.open(JsonDialogComponent, {data});
   }
 
-  onShowDetailsClick(title: string, subtitle: string, details: {}) {
-    const data: JsonDialogData = {
+  onShowDetailsClick(title: string, subtitle: string, details: assetParameterizationDetail) {
+    const data: ParameterizationDetailDialogData = {
       title,
       subtitle,
-      icon: 'info',
-      objectForJson: details,
+      icon: 'list',
+      objectForDetailDialog: details,
     };
-    this.matDialog.open(JsonDialogComponent, {data});
+    this.matDialog.open(ParameterizationDetailDialogComponent, {data});
   }
 
   buildContractOfferGroup(

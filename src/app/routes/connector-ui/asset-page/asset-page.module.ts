@@ -31,7 +31,9 @@ import {DataSubcategoryItemsPipe} from './data-subcategory-select/data-subcatego
 import {DataSubcategorySelectComponent} from './data-subcategory-select/data-subcategory-select.component';
 import {KeywordSelectComponent} from './keyword-select/keyword-select.component';
 import {LanguageSelectComponent} from './language-select/language-select.component';
+import {ParameterizationDetailDialogComponent} from './parameterization-detail-dialog/parameterization-detail-dialog.component';
 import {TransportModeSelectComponent} from './transport-mode-select/transport-mode-select.component';
+
 
 @NgModule({
   imports: [
@@ -71,12 +73,14 @@ import {TransportModeSelectComponent} from './transport-mode-select/transport-mo
     AssetCreateDialogComponent,
     AssetPageComponent,
     DataCategorySelectComponent,
-    DataSubcategorySelectComponent,
     DataSubcategoryItemsPipe,
+    DataSubcategorySelectComponent,
     KeywordSelectComponent,
     LanguageSelectComponent,
+    ParameterizationDetailDialogComponent,
     TransportModeSelectComponent,
   ],
   exports: [AssetPageComponent],
 })
-export class AssetPageModule {}
+export class AssetPageModule {
+}

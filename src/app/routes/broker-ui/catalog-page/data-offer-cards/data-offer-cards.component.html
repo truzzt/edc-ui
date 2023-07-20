@@ -1,40 +1,70 @@
-<mat-card *ngFor="let dataOffer of dataOffers" class="asset-card">
-  <ng-container *ngIf="dataOffer.asset; let asset">
-    <mat-card-header>
-      <icon-with-online-status
-        mat-card-avatar
-        mainIcon="sim_card"
-        [onlineStatus]="dataOffer.connectorOnlineStatus">
-      </icon-with-online-status>
-      <mat-card-title>
-        <a
-          class="link"
-          href="javascript:void(0)"
-          (click)="dataOfferClick.emit(dataOffer)">
-          {{ asset.name }}
-        </a>
-      </mat-card-title>
-      <mat-card-subtitle>{{ asset.originatorOrganization }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content class="flex flex-col space-y-[16px]">
-      <!-- Description -->
-      <div
-        *ngIf="asset.description"
-        class="whitespace-pre-line truncate-lines-5">
-        {{ asset.description }}
-      </div>
-
-      <!-- Tag List -->
-      <div *ngIf="asset.keywords.length || asset.version">
-        <mat-chip-list aria-label="Tags">
-          <mat-chip *ngIf="asset.version" color="primary" selected>{{
-            asset.version
-          }}</mat-chip>
-          <mat-chip *ngFor="let keyword of asset.keywords">{{
-            keyword
-          }}</mat-chip>
-        </mat-chip-list>
-      </div>
-    </mat-card-content>
-  </ng-container>
-</mat-card>
+<table class="table align-middle mb-0 bg-white">
+  <thead class="bg-light">
+    <tr>
+      <th>Status</th>
+      <th>Title</th>
+      <th>Organization</th>
+      <th>Version</th>
+      <th>Keywords</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let dataOffer of dataOffers" class="asset-card">
+      <ng-container *ngIf="dataOffer.asset; let asset">
+        <td>
+          <div class="d-flex align-items-center">
+            <icon-with-online-status
+              mainIcon="sim_card"
+              [onlineStatus]="dataOffer.connectorOnlineStatus">
+            </icon-with-online-status>
+          </div>
+        </td>
+        <td>
+          <div class="ms-3">
+            <p class="fw-bold mb-1">
+              <a
+                class="link"
+                href="javascript:void(0)"
+                (click)="dataOfferClick.emit(dataOffer)">
+                {{ asset.name }}
+              </a>
+            </p>
+          </div>
+        </td>
+        <td>{{ asset.originatorOrganization }}</td>
+        <td>
+          <div
+            *ngIf="asset.keywords.length || asset.version"
+            style="display: inline-flex; justify-content: center">
+            <mat-chip-list aria-label="Tags">
+              <mat-chip *ngIf="asset.version" color="primary" selected>{{
+                asset.version
+              }}</mat-chip>
+            </mat-chip-list>
+          </div>
+        </td>
+        <td>
+          <div
+            *ngIf="asset.keywords.length || asset.version"
+            style="display: inline-flex; justify-content: center">
+            <mat-chip-list aria-label="Tags">
+              <mat-chip *ngFor="let keyword of asset.keywords">{{
+                keyword
+              }}</mat-chip>
+            </mat-chip-list>
+          </div>
+        </td>
+        <td>
+          <button
+            class="btn btn-link btn-sm btn-rounded"
+            type="button"
+            href="javascript:void(0)"
+            (click)="dataOfferClick.emit(dataOffer)">
+            Details
+          </button>
+        </td>
+      </ng-container>
+    </tr>
+  </tbody>
+</table>

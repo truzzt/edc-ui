@@ -34,7 +34,6 @@ import {LanguageSelectComponent} from './language-select/language-select.compone
 import {ParameterizationDetailDialogComponent} from './parameterization-detail-dialog/parameterization-detail-dialog.component';
 import {TransportModeSelectComponent} from './transport-mode-select/transport-mode-select.component';
 
-
 @NgModule({
   imports: [
     // Angular
@@ -82,5 +81,4 @@ import {TransportModeSelectComponent} from './transport-mode-select/transport-mo
   ],
   exports: [AssetPageComponent],
 })
-export class AssetPageModule {
-}
+export class AssetPageModule {}

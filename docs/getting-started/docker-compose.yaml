@@ -4,6 +4,11 @@ services:
     image: ghcr.io/sovity/edc-ui:latest
     ports:
       - '11000:80'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:80/" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
     environment:
       - EDC_UI_ACTIVE_PROFILE=sovity-open-source
       - EDC_UI_CONFIG_URL=edc-ui-config

@@ -14,6 +14,7 @@ Feel free to edit this release checklist in-progress depending on what tasks nee
 - [ ] Decide a release version depending on the previous release.
 - [ ] Update this issue's title to the new version
 - [ ] `release-prep` PR:
+  - [ ] Check if the README.md need to be updated with latest UI screen-prints (under UI snapshots)
   - [ ] Update the CHANGELOG.md.
     - [ ] Add a clean `Unreleased` version.
     - [ ] Add the version to the old section.

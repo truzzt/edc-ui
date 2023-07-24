@@ -177,6 +177,15 @@ to overwrite nginx bind address and port.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- SCREEN-PRINTS -->
+## UI Snapshots
+
+<p align="center">
+  <img src="docs/screenshots/create_new_asset.png" width="150">
+  <img src="docs/screenshots/contracts_page.png" width="150">
+  <img src="docs/screenshots/dashboard.png" width="150">
+</p>
+
 <!-- CONTRIBUTING -->
 
 ## Contributing

@@ -26,7 +26,7 @@ export class ContractDefinitionEditorDialog implements OnInit, OnDestroy {
   policies: PolicyDefinition[] = [];
   assets: Asset[] = [];
   loading = false;
-
+  static assetIdFromAssetCreation: string;
   constructor(
     public form: ContractDefinitionEditorDialogForm,
     private notificationService: NotificationService,
@@ -40,7 +40,9 @@ export class ContractDefinitionEditorDialog implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-
+    this.form.patchValue({
+      id: ContractDefinitionEditorDialog.assetIdFromAssetCreation,
+    });
     this.policyService
       .getAllPolicies(0, 10_000_000)
       .pipe(takeUntil(this.ngOnDestroy$))

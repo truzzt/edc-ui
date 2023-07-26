@@ -1,6 +1,6 @@
 import {Component, OnDestroy} from '@angular/core';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Observable, Subject} from 'rxjs';
+import {distinctUntilChanged, Observable, Subject} from 'rxjs';
 import {filter, finalize, map, takeUntil} from 'rxjs/operators';
 import {
   ConfirmDialogModel,
@@ -72,11 +72,9 @@ export class AssetCreateDialogComponent implements OnDestroy {
         complete: () => {
           this.notificationService.showInfo('Successfully created asset');
           this.close({refreshList: true});
-          console.log(assetEntryDto.asset);
           this.onAssetCreation(formValue.metadata?.id!);
         },
-        error: (error) => {
-          console.error('Failed creating asset!', error);
+        error: () => {
           this.notificationService.showError('Failed creating asset!');
           this.close({refreshList: true});
           console.log(assetEntryDto.asset);
@@ -90,18 +88,16 @@ export class AssetCreateDialogComponent implements OnDestroy {
   }
 
   private onAssetCreation(assetId: string) {
-    console.log('the asset id is' + assetId);
-    this.confirmCreate(assetId).subscribe(() => {
-      complete: () => {
+    this.confirmCreate(assetId).pipe(distinctUntilChanged()).subscribe(() => {
         this.close({refreshList: true});
+        ContractDefinitionEditorDialog.assetIdFromAssetCreation = assetId;
         const dialogRef = this.matDialog.open(ContractDefinitionEditorDialog);
-        dialogRef
-          .afterClosed()
-          .pipe(
-            map((it) => it as ContractDefinitionEditorDialogResult | null),
-            filter((it) => !!it?.refreshList),
-          ).subscribe(() => ContractDefinitionPageComponent.fetch$.next(null));
-      };
+       dialogRef
+         .afterClosed()
+         .pipe(
+           map((it) => it as ContractDefinitionEditorDialogResult | null),
+           filter((it) => !!it?.refreshList),
+         ).subscribe(() => ContractDefinitionPageComponent.fetch$.next(null));
     });
   }
 

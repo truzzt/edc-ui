@@ -20,7 +20,7 @@ export class ContractDefinitionPageComponent implements OnInit {
   searchText = new FormControl<string>('');
   deleteBusy = false;
 
-  public static fetch$ = new BehaviorSubject(null);
+  static fetch$ = new BehaviorSubject(null);
 
   constructor(
     private contractDefinitionPageService: ContractDefinitionPageService,

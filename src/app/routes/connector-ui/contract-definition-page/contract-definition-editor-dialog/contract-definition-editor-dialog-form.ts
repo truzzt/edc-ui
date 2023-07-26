@@ -32,4 +32,8 @@ export class ContractDefinitionEditorDialogForm {
       assets: [[] as Asset[], Validators.required],
     });
   }
+
+  patchValue(param: { id: string }) {
+    
+  }
 }

@@ -20,7 +20,7 @@ export class ContractDefinitionPageComponent implements OnInit {
   searchText = new FormControl<string>('');
   deleteBusy = false;
 
-  private fetch$ = new BehaviorSubject(null);
+  public static fetch$ = new BehaviorSubject(null);
 
   constructor(
     private contractDefinitionPageService: ContractDefinitionPageService,
@@ -29,7 +29,7 @@ export class ContractDefinitionPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.contractDefinitionPageService
-      .contractDefinitionPageData$(this.fetch$, this.searchText$())
+      .contractDefinitionPageData$(ContractDefinitionPageComponent.fetch$, this.searchText$())
       .subscribe((contractDefinitionList) => {
         this.contractDefinitionList = contractDefinitionList;
       });
@@ -46,14 +46,14 @@ export class ContractDefinitionPageComponent implements OnInit {
       .subscribe(() => this.refresh());
   }
 
-  refresh() {
-    this.fetch$.next(null);
-  }
-
   private searchText$(): Observable<string> {
     return (value$(this.searchText) as Observable<string>).pipe(
       map((it) => (it ?? '').trim()),
       distinctUntilChanged(),
     );
+  }
+
+  refresh() {
+    ContractDefinitionPageComponent.fetch$.next(null);
   }
 }

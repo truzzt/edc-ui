@@ -76,4 +76,19 @@ export class ConfirmDialogModel {
     dialogData.cancelText = 'Cancel';
     return dialogData;
   }
+
+  public static forCreate(
+    existingEntityType: string,
+    identifier: string,
+    newEntityType: string,
+  ): ConfirmDialogModel {
+    const dialogData = new ConfirmDialogModel(
+      'Creation confirmation',
+      `Would you like to publish the ${existingEntityType} ${identifier} by creating a new ${newEntityType}?`,
+    );
+    dialogData.confirmColor = 'primary';
+    dialogData.confirmText = 'Create';
+    dialogData.cancelText = 'Cancel';
+    return dialogData;
+  }
 }

@@ -40,6 +40,7 @@ export class ContractDefinitionEditorDialog implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+
     this.policyService
       .getAllPolicies(0, 10_000_000)
       .pipe(takeUntil(this.ngOnDestroy$))
@@ -53,7 +54,7 @@ export class ContractDefinitionEditorDialog implements OnInit, OnDestroy {
         this.assets = assets.map((it) =>
           this.assetPropertyMapper.buildAssetFromProperties(it.properties),
         );
-      });
+      })
   }
 
   onCreate() {

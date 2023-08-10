@@ -225,7 +225,7 @@
               *ngIf="form.datasource.controls.httpProxyMethod; let ctrl"
               class="flex flex-row mb-[10px]">
               <button
-                mat-button
+                mat-flat-button
                 [color]="ctrl.value ? 'warn' : 'primary'"
                 (click)="ctrl.setValue(!ctrl.value)">
                 {{ ctrl.value ? 'Disable' : 'Enable' }} Method Parameterization
@@ -257,7 +257,7 @@
               *ngIf="form.datasource.controls.httpProxyPath; let ctrl"
               class="flex flex-row mb-[10px]">
               <button
-                mat-button
+                mat-flat-button
                 [color]="ctrl.value ? 'warn' : 'primary'"
                 (click)="ctrl.setValue(!ctrl.value)">
                 {{ ctrl.value ? 'Disable' : 'Enable' }} Path Parameterization
@@ -297,7 +297,7 @@
 
               <!-- Query Param Delete Button -->
               <button
-                mat-button
+                mat-flat-button
                 color="warn"
                 style="height: 54px; margin-top: 4px; margin-left: 8px"
                 (click)="form.onHttpQueryParamsRemoveClick(i)">
@@ -316,7 +316,7 @@
             <div class="flex flex-row mb-[10px] space-x-[10px]">
               <!-- Add Query Param Button -->
               <button
-                mat-button
+                mat-flat-button
                 color="primary"
                 (click)="form.onHttpQueryParamsAddClick()">
                 Add {{ form.proxyQueryParams ? 'Default' : '' }} Query Param
@@ -325,7 +325,7 @@
               <!-- Toggle Proxy QueryParams Button -->
               <button
                 *ngIf="form.datasource.controls.httpProxyQueryParams; let ctrl"
-                mat-button
+                mat-flat-button
                 [color]="ctrl.value ? 'warn' : 'primary'"
                 (click)="ctrl.setValue(!ctrl.value)">
                 {{ ctrl.value ? 'Disable' : 'Enable' }} Query Param
@@ -345,7 +345,7 @@
               *ngIf="form.datasource.controls.httpProxyBody; let ctrl"
               class="flex flex-row mb-[10px]">
               <button
-                mat-button
+                mat-flat-button
                 [color]="ctrl.value ? 'warn' : 'primary'"
                 (click)="ctrl.setValue(!ctrl.value)">
                 {{ ctrl.value ? 'Disable' : 'Enable' }} Request Body
@@ -362,7 +362,7 @@
               "
               class="flex flex-row mb-[10px]">
               <button
-                mat-button
+                mat-flat-button
                 color="primary"
                 (click)="
                   form.datasource.controls.httpAuthHeaderType.setValue(
@@ -442,7 +442,7 @@
               "
               class="flex flex-row mb-[10px]">
               <button
-                mat-button
+                mat-flat-button
                 color="warn"
                 (click)="
                   form.datasource.controls.httpAuthHeaderType.setValue('None')
@@ -481,7 +481,7 @@
 
               <!-- Header Delete Button -->
               <button
-                mat-button
+                mat-flat-button
                 color="warn"
                 style="height: 54px; margin-top: 4px; margin-left: 8px"
                 (click)="form.onHttpHeadersRemoveClick(i)">
@@ -492,7 +492,7 @@
             <!-- Add Header Button -->
             <div class="flex flex-row mb-[10px]">
               <button
-                mat-button
+                mat-flat-button
                 color="primary"
                 (click)="form.onHttpHeadersAddClick()">
                 Add Additional Header

@@ -181,7 +181,8 @@ export class DashboardPageDataService {
           backgroundColor: states.map(
             (it) => colorsByState.get(it) ?? defaultColor,
           ),
-          borderColor: "primary"
+          borderColor: 'primary',
+          borderWidth: 3
         },
       ],
       options: {responsive: false},

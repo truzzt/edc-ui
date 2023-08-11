@@ -4,8 +4,8 @@ import {map} from 'rxjs/operators';
 import {APP_CONFIG, AppConfig} from '../../../../core/config/app-config';
 import {CatalogApiUrlService} from '../../../../core/services/api/catalog-api-url.service';
 import {ContractOfferService} from '../../../../core/services/api/contract-offer.service';
+import {EdcApiService} from '../../../../core/services/api/edc-api.service';
 import {
-  AssetService,
   ContractAgreementService,
   ContractDefinitionService,
   PolicyService,
@@ -27,13 +27,13 @@ import {DashboardPageData, defaultDashboardData} from './dashboard-page-data';
 export class DashboardPageDataService {
   constructor(
     @Inject(APP_CONFIG) private config: AppConfig,
+    private edcApiService: EdcApiService,
     private catalogBrowserService: ContractOfferService,
     private contractDefinitionService: ContractDefinitionService,
     private contractAgreementService: ContractAgreementService,
     private policyService: PolicyService,
     private catalogApiUrlService: CatalogApiUrlService,
     private transferProcessService: TransferProcessService,
-    private assetService: AssetService,
     private transferProcessUtils: TransferProcessUtils,
     private lastCommitInfoService: LastCommitInfoService,
     private connectorInfoPropertyGridGroupBuilder: ConnectorInfoPropertyGridGroupBuilder,
@@ -106,8 +106,8 @@ export class DashboardPageDataService {
   }
 
   private assetKpis(): Observable<Partial<DashboardPageData>> {
-    return this.assetService.getAllAssets(0, 10_000_000).pipe(
-      map((assets) => assets.length),
+    return this.edcApiService.getAssetPage().pipe(
+      map((assetPage) => assetPage.assets.length),
       Fetched.wrap({
         failureMessage: 'Failed fetching assets.',
       }),

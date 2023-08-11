@@ -61,7 +61,6 @@ export class AssetPropertyGridGroupBuilder {
         labelTitle: AssetProperties.language,
         ...this.propertyGridUtils.guessValue(asset.language?.label),
       },
-
       {
         icon: 'apartment',
         label: 'Publisher',

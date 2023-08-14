@@ -12,4 +12,5 @@ export type EdcUiThemeConfig = Pick<
   | 'chartColorNeutral'
   | 'chartColorSuccess'
   | 'chartColorFailure'
+  | 'chartBorderColor'
 >;

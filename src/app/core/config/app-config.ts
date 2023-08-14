@@ -28,6 +28,7 @@ export interface AppConfig {
   chartColorNeutral: string;
   chartColorSuccess: string;
   chartColorFailure: string;
+  chartBorderColor: string;
 
   // EDC Backend Endpoints
   connectorEndpoint: string;

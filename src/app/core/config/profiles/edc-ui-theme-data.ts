@@ -8,6 +8,7 @@ export const SOVITY_THEME: EdcUiThemeConfig = {
   chartColorNeutral: '#7eb0d5',
   chartColorSuccess: '#b2e061',
   chartColorFailure: '#fd7f6f',
+  chartBorderColor: '#EBF4FF'
 };
 
 export const MDS_THEME: EdcUiThemeConfig = {
@@ -18,4 +19,5 @@ export const MDS_THEME: EdcUiThemeConfig = {
   chartColorNeutral: '#1c62ff',
   chartColorSuccess: '#ffbf0e',
   chartColorFailure: '#ff5a55',
+  chartBorderColor: '#FFFF14'
 };

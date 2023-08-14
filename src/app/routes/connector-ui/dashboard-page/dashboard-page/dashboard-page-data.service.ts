@@ -181,7 +181,7 @@ export class DashboardPageDataService {
           backgroundColor: states.map(
             (it) => colorsByState.get(it) ?? defaultColor,
           ),
-          borderColor: 'primary',
+          borderColor: this.config.chartBorderColor,
           borderWidth: 3
         },
       ],

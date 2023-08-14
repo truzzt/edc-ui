@@ -21,12 +21,10 @@ the detailed section referring to by linking pull requests or issues.
 #### Fixed
 
 - Removed 404-causing login polling from broker UI
+- Renamed button from cancel to close in json-dialogs
+- Updating the donut chart colors based on theme 
 
 #### Removed
-
-#### Fixed
-
-- Renamed button from cancel to close in json-dialogs
 
 ## [v0.0.1-milestone-8-sovity12] 12.07.2023
 

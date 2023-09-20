@@ -37,11 +37,7 @@ export class EdcApiService {
   createAsset(
     uiAssetCreateRequest: UiAssetCreateRequest,
   ): Observable<IdResponseDto> {
-    return from(
-      this.edcClient.uiApi.createAsset({
-        uiAssetCreateRequest,
-      }),
-    );
+    return from(this.edcClient.uiApi.createAsset({uiAssetCreateRequest}));
   }
 
   getAssetPage(): Observable<AssetPage> {

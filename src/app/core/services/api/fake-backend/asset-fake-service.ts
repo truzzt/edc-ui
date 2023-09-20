@@ -1,13 +1,13 @@
 import {
-  AssetCreateRequest,
-  AssetEntry,
   AssetPage,
   IdResponseDto,
+  UiAsset,
+  UiAssetCreateRequest,
 } from '@sovity.de/edc-client';
 import {AssetProperties} from '../../asset-properties';
 import {TestAssets} from './data/test-assets';
 
-export let assets: AssetEntry[] = [TestAssets.full, TestAssets.boring];
+export let assets: UiAsset[] = [TestAssets.full, TestAssets.boring];
 
 export const assetPage = (): AssetPage => {
   return {
@@ -15,8 +15,10 @@ export const assetPage = (): AssetPage => {
   };
 };
 
-export const createAsset = (asset: AssetCreateRequest): IdResponseDto => {
+export const createAsset = (asset: UiAssetCreateRequest): IdResponseDto => {
   assets.push({
+    assetId: asset.assetId,
+
     properties: asset.properties,
     privateProperties: asset.privateProperties,
   });

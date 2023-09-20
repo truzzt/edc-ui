@@ -1,5 +1,4 @@
 import {
-  AssetCreateRequestFromJSON,
   AssetDtoToJSON,
   AssetPageToJSON,
   ContractAgreementPageToJSON,
@@ -11,6 +10,7 @@ import {
   PolicyDefinitionCreateRequestFromJSON,
   PolicyDefinitionPageToJSON,
   TransferHistoryPageToJSON,
+  UiAssetCreateRequestFromJSON,
 } from '@sovity.de/edc-client';
 import {assetPage, createAsset, deleteAsset} from './asset-fake-service';
 import {
@@ -55,7 +55,7 @@ export const EDC_FAKE_BACKEND: FetchAPI = async (
 
     .url('pages/asset-page/assets')
     .on('POST', () => {
-      let createRequest = AssetCreateRequestFromJSON(body);
+      let createRequest = UiAssetCreateRequestFromJSON(body);
       let created = createAsset(createRequest);
       return ok(IdResponseDtoToJSON(created));
     })

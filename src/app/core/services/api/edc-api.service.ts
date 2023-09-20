@@ -15,6 +15,7 @@ import {
   PolicyDefinitionCreateRequest,
   PolicyDefinitionPage,
   TransferHistoryPage,
+  UiAssetCreateRequest,
   buildEdcClient,
 } from '@sovity.de/edc-client';
 import {APP_CONFIG, AppConfig} from '../../config/app-config';
@@ -35,9 +36,9 @@ export class EdcApiService {
   }
 
   createAsset(
-    assetCreateRequest: AssetCreateRequest,
+    uiAssetCreateRequest: UiAssetCreateRequest,
   ): Observable<IdResponseDto> {
-    return from(this.edcClient.uiApi.createAsset({assetCreateRequest}));
+    return from(this.edcClient.uiApi.createAsset({uiAssetCreateRequest}));
   }
 
   getAssetPage(): Observable<AssetPage> {

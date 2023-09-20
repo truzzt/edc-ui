@@ -1,8 +1,8 @@
-import {AssetDto, AssetEntry} from '@sovity.de/edc-client';
+import {AssetDto, AssetEntry, UiAsset} from '@sovity.de/edc-client';
 import {AssetProperties} from '../../../asset-properties';
 
 export namespace TestAssets {
-  export const boring: AssetEntry = {
+  export const boring: UiAsset = {
     properties: {
       [AssetProperties.id]: 'test-asset-1',
       [AssetProperties.name]: 'Test Asset 1',
@@ -13,45 +13,42 @@ export namespace TestAssets {
     },
   };
 
-  export const full: AssetEntry = {
-    properties: {
-      [AssetProperties.id]: 'urn:artifact:my-test-asset-4',
-      [AssetProperties.name]: 'Rail Network 2023 NRW - RailDesigner Export',
-      [AssetProperties.version]: '1.1',
-      [AssetProperties.originatorOrganization]: 'Deutsche Bahn AG',
-      [AssetProperties.keywords]: 'db, bahn, rail, Rail-Designer',
-      [AssetProperties.contentType]: 'application/json',
-      [AssetProperties.description]:
-        'Train Network Map released on 10.01.2023, valid until 31.02.2023. \nFile format is xyz as exported by Rail-Designer.',
-      [AssetProperties.language]: 'https://w3id.org/idsa/code/EN',
-      [AssetProperties.publisher]: 'https://my.cool-api.gg/about',
-      [AssetProperties.standardLicense]: 'https://my.cool-api.gg/license',
-      [AssetProperties.endpointDocumentation]: 'https://my.cool-api.gg/docs',
-      [AssetProperties.dataCategory]: 'Infrastructure and Logistics',
-      [AssetProperties.dataSubcategory]:
-        'General Information About Planning Of Routes',
-      [AssetProperties.dataModel]: 'my-data-model-001',
-      [AssetProperties.geoReferenceMethod]: 'my-geo-reference-method',
-      [AssetProperties.transportMode]: 'Rail',
-      'asset:prop:some-unsupported-property':
-        'F10E2821BBBEA527EA02200352313BC059445190',
-    },
+  export const full: UiAsset = {
+    [AssetProperties.id]: 'urn:artifact:my-test-asset-4',
+    [AssetProperties.name]: 'Rail Network 2023 NRW - RailDesigner Export',
+    [AssetProperties.version]: '1.1',
+    [AssetProperties.originatorOrganization]: 'Deutsche Bahn AG',
+    [AssetProperties.keywords]: 'db, bahn, rail, Rail-Designer',
+    [AssetProperties.contentType]: 'application/json',
+    [AssetProperties.description]:
+      'Train Network Map released on 10.01.2023, valid until 31.02.2023. \nFile format is xyz as exported by Rail-Designer.',
+    [AssetProperties.language]: 'https://w3id.org/idsa/code/EN',
+    [AssetProperties.publisher]: 'https://my.cool-api.gg/about',
+    [AssetProperties.standardLicense]: 'https://my.cool-api.gg/license',
+    [AssetProperties.endpointDocumentation]: 'https://my.cool-api.gg/docs',
+    [AssetProperties.dataCategory]: 'Infrastructure and Logistics',
+    [AssetProperties.dataSubcategory]:
+      'General Information About Planning Of Routes',
+    [AssetProperties.dataModel]: 'my-data-model-001',
+    [AssetProperties.geoReferenceMethod]: 'my-geo-reference-method',
+    [AssetProperties.transportMode]: 'Rail',
+    additionalProperties: {},
     privateProperties: {},
   };
 
-  export function toAssetDto(entry: AssetEntry): AssetDto {
+  export function toAssetDto(entry: UiAsset): AssetDto {
     return {
-      assetId: entry.properties[AssetProperties.id],
+      assetId: entry.assetId,
       createdAt: new Date(),
       properties: entry.properties,
     };
   }
 
-  export function toDummyAsset(entry: AssetEntry): AssetEntry {
-    return dummyAsset(entry.properties[AssetProperties.id]);
+  export function toDummyAsset(entry: UiAsset): UiAsset {
+    return dummyAsset(entry.assetId[AssetProperties.id]);
   }
 
-  export function dummyAsset(assetId: string): AssetEntry {
+  export function dummyAsset(assetId: string): UiAsset {
     return {
       properties: {
         [AssetProperties.id]: assetId,

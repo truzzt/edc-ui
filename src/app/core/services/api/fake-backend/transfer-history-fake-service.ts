@@ -3,7 +3,6 @@ import {
   TransferHistoryEntry,
   TransferHistoryPage,
 } from '@sovity.de/edc-client';
-import {AssetProperties} from '../../asset-properties';
 import {assets} from './asset-fake-service';
 import {TestAssets} from './data/test-assets';
 
@@ -67,8 +66,10 @@ export let transferHistoryEntries: TransferHistoryEntry[] = [
     contractAgreementId: 'test-asset-4-cd:f52a5d30-6356-4a55-a75a-3c45d7a88c3e',
     direction: 'PROVIDING',
     counterPartyConnectorEndpoint: 'https://sovity-demo2-edc/api/v1/ids/data',
-    assetName: TestAssets.full.properties[AssetProperties.name],
-    assetId: TestAssets.full.properties[AssetProperties.id],
+    assetName: TestAssets.full.name
+      ? TestAssets.full.name
+      : TestAssets.full.assetId,
+    assetId: TestAssets.full.assetId,
   },
 ];
 
@@ -89,9 +90,7 @@ export const transferProcessAsset = (transferProcessId: string): AssetDto => {
     TestAssets.dummyAsset(assetId),
   );
 
-  const assetEntry = assets.find(
-    (it) => it.properties[AssetProperties.id] === assetId,
-  );
+  const assetEntry = assets.find((it) => it.assetId === assetId);
 
   return isProviding && assetEntry
     ? TestAssets.toAssetDto(assetEntry)

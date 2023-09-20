@@ -65,7 +65,7 @@ export class TransferHistoryPageComponent implements OnInit, OnDestroy {
         map((asset) =>
           this.assetPropertyMapper.buildAsset({
             connectorEndpoint: item.counterPartyConnectorEndpoint,
-            properties: asset.properties,
+            asset: asset,
           }),
         ),
       );

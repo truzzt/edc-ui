@@ -1,4 +1,5 @@
 import {Inject, Injectable} from '@angular/core';
+import {UiAsset} from '@sovity.de/edc-client';
 import {AssetEditorDialogFormValue} from '../../routes/connector-ui/asset-page/asset-create-dialog/asset-editor-dialog-form-model';
 import {DataCategorySelectItemService} from '../../routes/connector-ui/asset-page/data-category-select/data-category-select-item.service';
 import {DataSubcategorySelectItemService} from '../../routes/connector-ui/asset-page/data-subcategory-select/data-subcategory-select-item.service';
@@ -27,74 +28,131 @@ export class AssetPropertyMapper {
     private activeFeatureSet: ActiveFeatureSet,
   ) {}
 
-  buildAsset(opts: {
-    connectorEndpoint: string;
-    properties: Record<string, string | null>;
-  }): Asset {
-    const props = opts.properties;
-    const lookup = <T>(key: string, fn: (id: string) => T) =>
-      props[key] ? fn(props[key]!) : null;
+  buildAsset(opts: {connectorEndpoint: string; asset: UiAsset}): Asset {
+    const asset = opts.asset;
 
-    const language = lookup(AssetProperties.language, (id) =>
-      this.languageSelectItemService.findById(id),
-    );
-    const dataCategory = lookup(AssetProperties.dataCategory, (id) =>
-      this.dataCategorySelectItemService.findById(id),
-    );
-    const dataSubcategory = lookup(AssetProperties.dataSubcategory, (id) =>
-      this.dataSubcategorySelectItemService.findById(id),
-    );
-    const transportMode = lookup(AssetProperties.transportMode, (id) =>
-      this.transportModeSelectItemService.findById(id),
-    );
-    const keywords = (props[AssetProperties.keywords] ?? '')
-      .split(',')
-      .map((it) => it.trim())
-      .filter((it) => it);
+    const language = asset.language
+      ? this.languageSelectItemService.findById(asset.language)
+      : null;
+    const dataCategory = asset.dataCategory
+      ? this.dataCategorySelectItemService.findById(asset.dataCategory)
+      : null;
+    const dataSubcategory = asset.dataSubcategory
+      ? this.dataSubcategorySelectItemService.findById(asset.dataSubcategory)
+      : null;
+    const transportMode = asset.transportMode
+      ? this.transportModeSelectItemService.findById(asset.transportMode)
+      : null;
 
-    const id = props[AssetProperties.id] ?? 'no-id-was-set';
-    const additionalProperties = this.buildAdditionalProperties(props);
+    const keywords = asset.keywords ?? [];
+
+    const id = asset.assetId ?? 'no-id-was-set';
+    const additionalProperties = this.buildAdditionalProperties(
+      asset.additionalProperties,
+    );
 
     return {
       id,
-      name: props[AssetProperties.name] ?? id,
-      version: props[AssetProperties.version],
-      contentType: props[AssetProperties.contentType],
+      name: asset.name ?? id,
+      version: asset.version ?? null,
+      contentType: asset.mediaType ?? null,
       originator: opts.connectorEndpoint,
       originatorOrganization:
-        props[AssetProperties.curatorOrganizationName] ??
-        'Unknown Organization',
+        asset.creatorOrganizationName ?? 'Unknown Organization',
       keywords,
-      description: props[AssetProperties.description],
+      description: trimmedOrNull(asset.description),
       language,
-      publisher: props[AssetProperties.publisher],
-      standardLicense: props[AssetProperties.standardLicense],
-      endpointDocumentation: props[AssetProperties.endpointDocumentation],
+      publisher: asset.publisherHomepage ?? null,
+      standardLicense: asset.licenseUrl ?? null,
+      endpointDocumentation: asset.landingPageUrl ?? null,
       dataCategory,
       dataSubcategory,
-      dataModel: props[AssetProperties.dataModel],
-      geoReferenceMethod: props[AssetProperties.geoReferenceMethod],
+      dataModel: asset.dataModel ?? null,
+      geoReferenceMethod: asset.geoReferenceMethod ?? null,
       transportMode,
-      httpProxyMethod: this._parseBoolean(
-        props[AssetProperties.httpProxyMethod],
-      ),
-      httpProxyPath: this._parseBoolean(props[AssetProperties.httpProxyPath]),
+      httpProxyMethod: this._parseBoolean(asset.httpDatasourceHintsProxyMethod),
+      httpProxyPath: this._parseBoolean(asset.httpDatasourceHintsProxyPath),
       httpProxyQueryParams: this._parseBoolean(
-        props[AssetProperties.httpProxyQueryParams],
+        asset.httpDatasourceHintsProxyBody,
       ),
-      httpProxyBody: this._parseBoolean(props[AssetProperties.httpProxyBody]),
+      httpProxyBody: this._parseBoolean(asset.httpDatasourceHintsProxyBody),
       additionalProperties,
     };
   }
 
-  private buildAdditionalProperties(props: Record<string, string | null>) {
+  buildUiAssetfromprops(props: Record<string, string>): UiAsset {
+    return {
+      assetId: props[AssetProperties.id] ?? '',
+      name: props[AssetProperties.name] ?? '',
+      version: props[AssetProperties.version] ?? '',
+      creatorOrganizationName:
+        props[AssetProperties.curatorOrganizationName] ?? '',
+      keywords: props[AssetProperties.keywords]
+        ?.split(',')
+        .map((it) => it.trim()),
+      mediaType: props[AssetProperties.contentType] ?? '',
+      description: props[AssetProperties.description] ?? '',
+      language: props[AssetProperties.language] ?? '',
+      publisherHomepage: props[AssetProperties.publisher] ?? '',
+      licenseUrl: props[AssetProperties.standardLicense] ?? '',
+      landingPageUrl: props[AssetProperties.endpointDocumentation] ?? '',
+      dataCategory: props[AssetProperties.dataCategory] ?? '',
+      dataSubcategory: props[AssetProperties.dataSubcategory] ?? '',
+      dataModel: props[AssetProperties.dataModel] ?? '',
+      geoReferenceMethod: props[AssetProperties.geoReferenceMethod] ?? '',
+      transportMode: props[AssetProperties.transportMode] ?? '',
+
+      httpDatasourceHintsProxyMethod: this._parseBooleanfromString(
+        props[AssetProperties.httpProxyMethod],
+      ),
+      httpDatasourceHintsProxyPath: this._parseBooleanfromString(
+        props[AssetProperties.httpProxyPath],
+      ),
+      httpDatasourceHintsProxyQueryParams: this._parseBooleanfromString(
+        props[AssetProperties.httpProxyQueryParams],
+      ),
+      httpDatasourceHintsProxyBody: this._parseBooleanfromString(
+        props[AssetProperties.httpProxyBody],
+      ),
+
+      additionalProperties: this.buildAdditionalPropertiesforUiAsset(props),
+    };
+  }
+
+  private buildAdditionalProperties(
+    props: Record<string, string> | undefined,
+  ): Array<{key: string; value: string}> {
+    if (!props) {
+      return [];
+    }
+
     const knownKeys = Object.values(AssetProperties);
     return Object.entries(props)
-      .filter(([k, _]) => !knownKeys.includes(k))
+      .filter(([k]) => !knownKeys.includes(k))
       .map(([key, value]) => ({
         key,
         value: value ?? '',
       }));
+  }
+
+  private buildAdditionalPropertiesforUiAsset(
+    props: Record<string, string> | undefined,
+  ): {[key: string]: string} {
+    if (!props) {
+      return {};
+    }
+
+    const knownKeys = Object.values(AssetProperties);
+    const filteredEntries = Object.entries(props).filter(
+      ([k]) => !knownKeys.includes(k),
+    );
+
+    const result: {[key: string]: string} = {};
+    for (const [key, value] of filteredEntries) {
+      result[key] = value ?? '';
+    }
+
+    return result;
   }
 
   buildProperties(
@@ -153,9 +211,16 @@ export class AssetPropertyMapper {
     return removeNullValues(props);
   }
 
-  private _parseBoolean(value: string | null): boolean | null {
-    if (!value) {
+  private _parseBoolean(value: boolean | null | undefined): boolean | null {
+    if (value != true && value != false) {
       return null;
+    }
+    return value;
+  }
+
+  private _parseBooleanfromString(value: string | null): boolean | undefined {
+    if (!value) {
+      return undefined;
     }
     return value === 'true';
   }

@@ -20,7 +20,7 @@ export class ContractAgreementCardMappedService {
   ): ContractAgreementCardMapped {
     let asset = this.assetPropertyMapper.buildAsset({
       connectorEndpoint: contractAgreement.counterPartyAddress,
-      properties: contractAgreement.asset.properties,
+      asset: contractAgreement.asset,
     });
 
     return {

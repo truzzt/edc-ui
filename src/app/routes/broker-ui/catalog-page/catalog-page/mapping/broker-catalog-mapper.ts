@@ -23,7 +23,9 @@ export class BrokerCatalogMapper {
       ...offer,
       asset: this.assetPropertyMapper.buildAsset({
         connectorEndpoint: offer.connectorEndpoint,
-        asset: this.assetPropertyMapper.buildUiAssetfromprops(offer.properties),
+        uiAsset: this.assetPropertyMapper.buildUiAssetfromprops(
+          offer.properties,
+        ),
       }),
     };
   }

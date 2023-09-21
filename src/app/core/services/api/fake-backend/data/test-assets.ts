@@ -1,4 +1,4 @@
-import {AssetDto, UiAsset} from '@sovity.de/edc-client';
+import {UiAsset} from '@sovity.de/edc-client';
 
 export namespace TestAssets {
   export const boring: UiAsset = {
@@ -28,15 +28,18 @@ export namespace TestAssets {
     dataModel: 'my-data-model-001',
     geoReferenceMethod: 'my-geo-reference-method',
     transportMode: 'Rail',
-    additionalProperties: {},
+    additionalProperties: {
+      'asset:prop:some-unsupported-property':
+        'F10E2821BBBEA527EA02200352313BC059445190',
+    },
     privateProperties: {},
   };
 
-  export function toAssetDto(entry: UiAsset): AssetDto {
+  export function toAssetDto(entry: UiAsset): UiAsset {
     return {
       assetId: entry.assetId,
-      createdAt: new Date(),
-      properties: {},
+      name: entry.name,
+      additionalProperties: {},
     };
   }
 
@@ -47,6 +50,7 @@ export namespace TestAssets {
   export function dummyAsset(assetId: string): UiAsset {
     return {
       assetId,
+      name: 'Dummy Asset',
       privateProperties: {},
     };
   }

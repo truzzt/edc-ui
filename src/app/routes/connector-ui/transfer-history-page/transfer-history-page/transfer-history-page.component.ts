@@ -9,7 +9,11 @@ import {
   switchMap,
 } from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import {TransferHistoryEntry, TransferHistoryPage} from '@sovity.de/edc-client';
+import {
+  TransferHistoryEntry,
+  TransferHistoryPage,
+  UiAsset,
+} from '@sovity.de/edc-client';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
 import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
 import {JsonDialogService} from '../../../../component-library/json-dialog/json-dialog/json-dialog.service';
@@ -57,17 +61,28 @@ export class TransferHistoryPageComponent implements OnInit, OnDestroy {
       this.ngOnDestroy$,
     );
   }
-
   loadAssetDetails(item: TransferHistoryEntry): Observable<Asset> {
     return this.edcApiService
       .getTransferProcessAsset(item.transferProcessId)
       .pipe(
-        map((asset) =>
-          this.assetPropertyMapper.buildAsset({
+        map((asset: UiAsset) => {
+          // Destructure properties to exclude from the main object
+          const {
+            additionalProperties,
+            additionalJsonProperties,
+            privateProperties,
+            privateJsonProperties,
+            ...assetProperties
+          } = asset;
+
+          // Return the Asset type structure
+          return {
+            ...assetProperties, // Spread the rest of UiAsset properties
             connectorEndpoint: item.counterPartyConnectorEndpoint,
-            asset: asset,
-          }),
-        ),
+            additionalProperties:
+              this.assetPropertyMapper.convertToAdditionalProperties(asset),
+          };
+        }),
       );
   }
 

@@ -23,7 +23,7 @@ export class ContractDefinitionCardBuilder {
     assets: Asset[],
     policyDefinitions: PolicyDefinitionDto[],
   ): ContractDefinitionCard[] {
-    const assetById = associateBy(assets, (asset) => asset.id);
+    const assetById = associateBy(assets, (asset) => asset.assetId);
     const policyDefinitionById = associateBy(
       policyDefinitions,
       (policyDefinition) => policyDefinition.policyDefinitionId,

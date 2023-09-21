@@ -29,7 +29,7 @@ export class ContractDefinitionBuilder {
           operator: 'IN',
           operandRight: {
             type: UiCriterionLiteralTypeEnum.ValueList,
-            valueList: formValue.assets!.map((it) => it.id),
+            valueList: formValue.assets!.map((it) => it.assetId),
           },
         },
       ],

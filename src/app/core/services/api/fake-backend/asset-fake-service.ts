@@ -17,7 +17,7 @@ export const assetPage = (): AssetPage => {
 export const createAsset = (asset: UiAssetCreateRequest): IdResponseDto => {
   assets.push({
     assetId: asset.id,
-    name: asset.name,
+    name: asset.name ?? asset.id,
     description: asset.description,
     creatorOrganizationName: asset.creatorOrganizationName,
     publisherHomepage: asset.publisherHomepage,

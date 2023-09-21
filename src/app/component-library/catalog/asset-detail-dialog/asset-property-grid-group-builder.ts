@@ -36,7 +36,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'category',
         label: 'ID',
         labelTitle: AssetProperties.id,
-        ...this.propertyGridUtils.guessValue(asset.id),
+        ...this.propertyGridUtils.guessValue(asset.assetId),
       },
       {
         icon: 'file_copy',
@@ -48,38 +48,38 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'language',
         label: 'Language',
         labelTitle: AssetProperties.language,
-        ...this.propertyGridUtils.guessValue(asset.language?.label),
+        ...this.propertyGridUtils.guessValue(asset.language),
       },
       {
         icon: 'apartment',
         label: 'Publisher',
         labelTitle: AssetProperties.publisher,
-        ...this.propertyGridUtils.guessValue(asset.publisher),
+        ...this.propertyGridUtils.guessValue(asset.publisherHomepage),
       },
       {
         icon: 'bookmarks',
         label: 'Endpoint Documentation',
         labelTitle: AssetProperties.endpointDocumentation,
-        ...this.propertyGridUtils.guessValue(asset.endpointDocumentation),
+        ...this.propertyGridUtils.guessValue(asset.landingPageUrl),
       },
       {
         icon: 'gavel',
         label: 'Standard License',
         labelTitle: AssetProperties.standardLicense,
-        ...this.propertyGridUtils.guessValue(asset.standardLicense),
+        ...this.propertyGridUtils.guessValue(asset.licenseUrl),
       },
-      this.buildConnectorEndpointField(asset.originator!!),
+      this.buildConnectorEndpointField(asset.connectorEndpoint),
       {
         icon: 'account_circle',
         label: 'Organization',
         labelTitle: AssetProperties.originatorOrganization,
-        ...this.propertyGridUtils.guessValue(asset.originatorOrganization),
+        ...this.propertyGridUtils.guessValue(asset.creatorOrganizationName),
       },
       {
         icon: 'category',
         label: 'Content Type',
         labelTitle: AssetProperties.contentType,
-        ...this.propertyGridUtils.guessValue(asset.contentType),
+        ...this.propertyGridUtils.guessValue(asset.mediaType),
       },
     ];
 
@@ -124,7 +124,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'commute',
         label: 'Transport Mode',
         labelTitle: AssetProperties.transportMode,
-        ...this.propertyGridUtils.guessValue(asset.transportMode?.label),
+        ...this.propertyGridUtils.guessValue(asset.transportMode),
       });
     }
     if (includeEmpty || asset.dataCategory) {
@@ -132,7 +132,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'commute',
         label: 'Data Category',
         labelTitle: AssetProperties.dataCategory,
-        ...this.propertyGridUtils.guessValue(asset.dataCategory?.label),
+        ...this.propertyGridUtils.guessValue(asset.dataCategory),
       });
     }
     if (includeEmpty || asset.dataSubcategory) {
@@ -140,7 +140,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'commute',
         label: 'Data Subcategory',
         labelTitle: AssetProperties.dataSubcategory,
-        ...this.propertyGridUtils.guessValue(asset.dataSubcategory?.label),
+        ...this.propertyGridUtils.guessValue(asset.dataSubcategory),
       });
     }
     if (includeEmpty || asset.dataModel) {

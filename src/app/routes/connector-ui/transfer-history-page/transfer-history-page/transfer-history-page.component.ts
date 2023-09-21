@@ -61,27 +61,16 @@ export class TransferHistoryPageComponent implements OnInit, OnDestroy {
       this.ngOnDestroy$,
     );
   }
+
   loadAssetDetails(item: TransferHistoryEntry): Observable<Asset> {
     return this.edcApiService
       .getTransferProcessAsset(item.transferProcessId)
       .pipe(
-        map((asset: UiAsset) => {
-          // Destructure properties to exclude from the main object
-          const {
-            additionalProperties,
-            additionalJsonProperties,
-            privateProperties,
-            privateJsonProperties,
-            ...assetProperties
-          } = asset;
-
-          // Return the Asset type structure
-          return {
-            ...assetProperties, // Spread the rest of UiAsset properties
+        map((uiAsset: UiAsset) => {
+          return this.assetPropertyMapper.buildAsset({
+            uiAsset,
             connectorEndpoint: item.counterPartyConnectorEndpoint,
-            additionalProperties:
-              this.assetPropertyMapper.convertToAdditionalProperties(asset),
-          };
+          });
         }),
       );
   }

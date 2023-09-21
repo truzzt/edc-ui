@@ -48,7 +48,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'language',
         label: 'Language',
         labelTitle: AssetProperties.language,
-        ...this.propertyGridUtils.guessValue(asset.language),
+        ...this.propertyGridUtils.guessValue(asset.language?.label),
       },
       {
         icon: 'apartment',
@@ -124,7 +124,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'commute',
         label: 'Transport Mode',
         labelTitle: AssetProperties.transportMode,
-        ...this.propertyGridUtils.guessValue(asset.transportMode),
+        ...this.propertyGridUtils.guessValue(asset.transportMode?.label),
       });
     }
     if (includeEmpty || asset.dataCategory) {
@@ -132,7 +132,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'commute',
         label: 'Data Category',
         labelTitle: AssetProperties.dataCategory,
-        ...this.propertyGridUtils.guessValue(asset.dataCategory),
+        ...this.propertyGridUtils.guessValue(asset.dataCategory?.label),
       });
     }
     if (includeEmpty || asset.dataSubcategory) {
@@ -140,7 +140,7 @@ export class AssetPropertyGridGroupBuilder {
         icon: 'commute',
         label: 'Data Subcategory',
         labelTitle: AssetProperties.dataSubcategory,
-        ...this.propertyGridUtils.guessValue(asset.dataSubcategory),
+        ...this.propertyGridUtils.guessValue(asset.dataSubcategory?.label),
       });
     }
     if (includeEmpty || asset.dataModel) {

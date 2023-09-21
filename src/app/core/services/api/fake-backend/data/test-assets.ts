@@ -28,6 +28,10 @@ export namespace TestAssets {
     dataModel: 'my-data-model-001',
     geoReferenceMethod: 'my-geo-reference-method',
     transportMode: 'Rail',
+    httpDatasourceHintsProxyQueryParams: true,
+    httpDatasourceHintsProxyPath: false,
+    httpDatasourceHintsProxyMethod: false,
+    httpDatasourceHintsProxyBody: false,
     additionalProperties: {
       'asset:prop:some-unsupported-property':
         'F10E2821BBBEA527EA02200352313BC059445190',

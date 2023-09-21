@@ -1,6 +1,9 @@
 import {Injectable} from '@angular/core';
 import {UiAsset} from '@sovity.de/edc-client';
-import {AssetProperties} from './asset-properties';
+import {DataCategorySelectItemService} from '../../routes/connector-ui/asset-page/data-category-select/data-category-select-item.service';
+import {DataSubcategorySelectItemService} from '../../routes/connector-ui/asset-page/data-subcategory-select/data-subcategory-select-item.service';
+import {LanguageSelectItemService} from '../../routes/connector-ui/asset-page/language-select/language-select-item.service';
+import {TransportModeSelectItemService} from '../../routes/connector-ui/asset-page/transport-mode-select/transport-mode-select-item.service';
 import {AdditionalAssetProperty, Asset} from './models/asset';
 
 /**
@@ -10,44 +13,12 @@ import {AdditionalAssetProperty, Asset} from './models/asset';
   providedIn: 'root',
 })
 export class AssetPropertyMapper {
-  buildUiAssetfromprops(props: Record<string, string>): UiAsset {
-    return {
-      assetId: props[AssetProperties.id] ?? '',
-      name: props[AssetProperties.name] ?? '',
-      version: props[AssetProperties.version] ?? '',
-      creatorOrganizationName:
-        props[AssetProperties.curatorOrganizationName] ?? '',
-      keywords: props[AssetProperties.keywords]
-        ?.split(',')
-        .map((it) => it.trim()),
-      mediaType: props[AssetProperties.contentType] ?? '',
-      description: props[AssetProperties.description] ?? '',
-      language: props[AssetProperties.language] ?? '',
-      publisherHomepage: props[AssetProperties.publisher] ?? '',
-      licenseUrl: props[AssetProperties.standardLicense] ?? '',
-      landingPageUrl: props[AssetProperties.endpointDocumentation] ?? '',
-      dataCategory: props[AssetProperties.dataCategory] ?? '',
-      dataSubcategory: props[AssetProperties.dataSubcategory] ?? '',
-      dataModel: props[AssetProperties.dataModel] ?? '',
-      geoReferenceMethod: props[AssetProperties.geoReferenceMethod] ?? '',
-      transportMode: props[AssetProperties.transportMode] ?? '',
-
-      httpDatasourceHintsProxyMethod: this._parseBooleanFromString(
-        props[AssetProperties.httpProxyMethod],
-      ),
-      httpDatasourceHintsProxyPath: this._parseBooleanFromString(
-        props[AssetProperties.httpProxyPath],
-      ),
-      httpDatasourceHintsProxyQueryParams: this._parseBooleanFromString(
-        props[AssetProperties.httpProxyQueryParams],
-      ),
-      httpDatasourceHintsProxyBody: this._parseBooleanFromString(
-        props[AssetProperties.httpProxyBody],
-      ),
-
-      additionalProperties: this.buildAdditionalPropertiesforUiAsset(props),
-    };
-  }
+  constructor(
+    private languageSelectItemService: LanguageSelectItemService,
+    private transportModeSelectItemService: TransportModeSelectItemService,
+    private dataCategorySelectItemService: DataCategorySelectItemService,
+    private dataSubcategorySelectItemService: DataSubcategorySelectItemService,
+  ) {}
 
   buildAsset(opts: {uiAsset: UiAsset; connectorEndpoint: string}): Asset {
     const {
@@ -55,17 +26,42 @@ export class AssetPropertyMapper {
       additionalJsonProperties,
       privateProperties,
       privateJsonProperties,
+      language,
+      dataCategory,
+      dataSubcategory,
+      transportMode,
       ...assetProperties
     } = opts.uiAsset;
 
+    const languageSelectItem =
+      language == null
+        ? null
+        : this.languageSelectItemService.findById(language);
+    const dataCategorySelectItem =
+      dataCategory == null
+        ? null
+        : this.dataCategorySelectItemService.findById(dataCategory);
+    const dataSubcategorySelectItem =
+      dataSubcategory == null
+        ? null
+        : this.dataSubcategorySelectItemService.findById(dataSubcategory);
+    const transportModeSelectItem =
+      transportMode == null
+        ? null
+        : this.transportModeSelectItemService.findById(transportMode);
+
     return {
       ...assetProperties,
-      additionalProperties: this.convertToAdditionalProperties(opts.uiAsset),
+      additionalProperties: this.buildAdditionalProperties(opts.uiAsset),
+      language: languageSelectItem,
+      dataCategory: dataCategorySelectItem,
+      dataSubcategory: dataSubcategorySelectItem,
+      transportMode: transportModeSelectItem,
       connectorEndpoint: opts.connectorEndpoint,
     };
   }
 
-  convertToAdditionalProperties(asset: UiAsset): AdditionalAssetProperty[] {
+  buildAdditionalProperties(asset: UiAsset): AdditionalAssetProperty[] {
     let result: AdditionalAssetProperty[] = [];
     type AssetKey =
       | 'additionalProperties'
@@ -89,32 +85,5 @@ export class AssetPropertyMapper {
       }
     }
     return result;
-  }
-
-  private buildAdditionalPropertiesforUiAsset(
-    props: Record<string, string> | undefined,
-  ): {[key: string]: string} {
-    if (!props) {
-      return {};
-    }
-
-    const knownKeys = Object.values(AssetProperties);
-    const filteredEntries = Object.entries(props).filter(
-      ([k]) => !knownKeys.includes(k),
-    );
-
-    const result: {[key: string]: string} = {};
-    for (const [key, value] of filteredEntries) {
-      result[key] = value ?? '';
-    }
-
-    return result;
-  }
-
-  private _parseBooleanFromString(value: string | null): boolean | undefined {
-    if (!value) {
-      return undefined;
-    }
-    return value === 'true';
   }
 }

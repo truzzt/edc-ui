@@ -20,8 +20,8 @@ export class AssetEntryBuilder {
   buildAssetCreateRequest(
     formValue: AssetEditorDialogFormValue,
   ): UiAssetCreateRequest {
-    let id = formValue.metadata?.id ?? 'no-id-was-set';
-    let name = formValue.metadata?.name;
+    let id = formValue.metadata?.id!;
+    let name = formValue.metadata?.name!;
     let version = formValue.metadata?.version;
     let description = formValue.metadata?.description;
     let language = formValue.metadata?.language?.id;

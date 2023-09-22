@@ -14,6 +14,10 @@ import {
   PolicyDefinitionCreateRequest,
   PolicyDefinitionPage,
   TransferHistoryPage,
+  UiAsset,
+  UiAssetCreateRequest,
+  UiContractNegotiation,
+  UiDataOffer,
   buildEdcClient,
 } from '@sovity.de/edc-client';
 import {APP_CONFIG, AppConfig} from '../../config/app-config';
@@ -120,6 +124,7 @@ export class EdcApiService {
       this.edcClient.uiApi.catalogPageDataOffers({connectorEndpoint}),
     );
   }
+
   initiateContractNegotiation(
     contractNegotiationRequest: ContractNegotiationRequest,
   ): Observable<UiContractNegotiation> {

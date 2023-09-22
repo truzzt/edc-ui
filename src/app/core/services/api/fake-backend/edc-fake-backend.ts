@@ -3,7 +3,8 @@ import {
   ContractAgreementPageToJSON,
   ContractAgreementTransferRequestFromJSON,
   ContractDefinitionPageToJSON,
-  ContractDefinitionRequestFromJSON, ContractNegotiationRequest,
+  ContractDefinitionRequestFromJSON,
+  ContractNegotiationRequestFromJSON,
   FetchAPI,
   IdResponseDtoToJSON,
   PolicyDefinitionCreateRequestFromJSON,
@@ -11,6 +12,7 @@ import {
   TransferHistoryPageToJSON,
   UiAssetCreateRequestFromJSON,
   UiAssetToJSON,
+  UiContractNegotiationToJSON,
 } from '@sovity.de/edc-client';
 import {assetPage, createAsset, deleteAsset} from './asset-fake-service';
 import {getCatalogPageDataOffers} from './catalog-fake-service';
@@ -24,6 +26,10 @@ import {
   deleteContractDefinition,
 } from './contract-definition-fake-service';
 import {
+  getContractNegotiation,
+  initiateContractNegotiation,
+} from './contract-negotiation-fake-service';
+import {
   createPolicyDefinition,
   deletePolicyDefinition,
   policyDefinitionPage,
@@ -35,7 +41,6 @@ import {
 import {getBody, getMethod, getUrl} from './utils/request-utils';
 import {ok} from './utils/response-utils';
 import {UrlInterceptor} from './utils/url-interceptor';
-import {initiateContractNegotiation} from "./contract-negotiation-fake-service";
 
 export const EDC_FAKE_BACKEND: FetchAPI = async (
   input: RequestInfo,
@@ -138,13 +143,19 @@ export const EDC_FAKE_BACKEND: FetchAPI = async (
     })
 
     .url('pages/catalog-page/contract-negotiations')
-    .on('POST', (contractNegotiationRequest: ContractNegotiationRequest) => {
-      let contractNegotiation = initiateContractNegotiation(contractNegotiationRequest);
-      return ok(contractNegotiation);
+    .on('POST', () => {
+      let createRequest = ContractNegotiationRequestFromJSON(body);
 
+      let contractNegotiation = initiateContractNegotiation(createRequest);
+
+      return ok(UiContractNegotiationToJSON(contractNegotiation));
     })
 
-
+    .url('pages/catalog-page/contract-negotiations')
+    .on('POST', (contractNegotiationId) => {
+      let contractNegotiation = getContractNegotiation(contractNegotiationId);
+      return ok(contractNegotiation);
+    })
 
     .tryMatch();
 };

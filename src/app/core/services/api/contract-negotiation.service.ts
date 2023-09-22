@@ -2,11 +2,13 @@ import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {ContractNegotiationRequest} from '@sovity.de/edc-client';
 import {environment} from '../../../../environments/environment';
 import {ContractOffer} from '../models/contract-offer';
 import {NegotiationResult} from '../models/negotiation-result';
 import {TransferProcessStates} from '../models/transfer-process-states';
 import {NotificationService} from '../notification.service';
+import {EdcApiService} from './edc-api.service';
 import {
   ContractNegotiationService as ContractNegotiationApiService,
   ContractNegotiationDto,
@@ -35,6 +37,7 @@ export class ContractNegotiationService {
   private pollingHandleNegotiation?: any;
 
   constructor(
+    private edcApiService: EdcApiService,
     private contractNegotiationService: ContractNegotiationApiService,
     private router: Router,
     private notificationService: NotificationService,
@@ -147,10 +150,10 @@ export class ContractNegotiationService {
     );
   }
   private initiateNegotiation(
-    initiateDto: NegotiationInitiateRequestDto,
+    initiateDto: ContractNegotiationRequest,
   ): Observable<string> {
-    return this.contractNegotiationService
-      .initiateContractNegotiation(initiateDto, 'body', false)
+    return this.edcApiService
+      .initiateContractNegotiation(initiateDto)
       .pipe(map((t) => t.id!));
   }
 

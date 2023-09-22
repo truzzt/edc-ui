@@ -33,7 +33,7 @@ export class AssetDetailDialogDataService {
     const propertyGridGroups = [
       this.assetPropertyGridGroupBuilder.buildAssetPropertiesGroup(asset, null),
       this.assetPropertyGridGroupBuilder.buildAdditionalPropertiesGroup(asset),
-      this.assetPropertyGridGroupBuilder.buildPolicyGroup(
+      this.assetPropertyGridGroupBuilder.buildUiPolicyGroup(
         asset,
         contractPolicy,
       ),

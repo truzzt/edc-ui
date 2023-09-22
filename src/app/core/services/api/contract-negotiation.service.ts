@@ -1,19 +1,16 @@
 import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {ContractNegotiationRequest} from '@sovity.de/edc-client';
+import {
+  ContractNegotiationRequest,
+  UiContractNegotiation,
+} from '@sovity.de/edc-client';
 import {environment} from '../../../../environments/environment';
 import {ContractOffer} from '../models/contract-offer';
 import {NegotiationResult} from '../models/negotiation-result';
 import {TransferProcessStates} from '../models/transfer-process-states';
 import {NotificationService} from '../notification.service';
 import {EdcApiService} from './edc-api.service';
-import {
-  ContractNegotiationService as ContractNegotiationApiService,
-  ContractNegotiationDto,
-  NegotiationInitiateRequestDto,
-} from './legacy-managent-api-client';
 
 interface RunningTransferProcess {
   processId: string;
@@ -30,15 +27,14 @@ export class ContractNegotiationService {
     NegotiationResult
   >();
   // contractOfferId, contractAgreementId
-  finishedNegotiations: Map<string, ContractNegotiationDto> = new Map<
+  finishedNegotiations: Map<string, UiContractNegotiation> = new Map<
     string,
-    ContractNegotiationDto
+    UiContractNegotiation
   >();
   private pollingHandleNegotiation?: any;
 
   constructor(
     private edcApiService: EdcApiService,
-    private contractNegotiationService: ContractNegotiationApiService,
     private router: Router,
     private notificationService: NotificationService,
   ) {
@@ -85,26 +81,22 @@ export class ContractNegotiationService {
   }
 
   negotiate(contractOffer: ContractOffer) {
-    const initiateRequest: NegotiationInitiateRequestDto = {
-      connectorAddress: contractOffer.asset.connectorEndpoint!,
-
-      offer: {
-        offerId: contractOffer.id,
-        assetId: contractOffer.asset.assetId,
-        policy: contractOffer.policy,
-      },
-      connectorId: 'my-connector',
-      protocol: 'ids-multipart',
+    const initiateRequest: ContractNegotiationRequest = {
+      counterPartyAddress: contractOffer.asset.connectorEndpoint!,
+      contractOfferId: contractOffer.id,
+      assetId: contractOffer.asset.assetId,
+      policyJsonLd: contractOffer.policy.policyJsonLd,
+      counterPartyParticipantId: 'my-connector',
     };
 
     const finishedNegotiationStates = ['CONFIRMED', 'DECLINED', 'ERROR'];
 
     this.initiateNegotiation(initiateRequest).subscribe(
-      (negotiationId) => {
-        this.finishedNegotiations.delete(initiateRequest.offer.offerId);
-        this.runningNegotiations.set(initiateRequest.offer.offerId, {
-          id: negotiationId,
-          offerId: initiateRequest.offer.offerId,
+      (uiContractNegotiation) => {
+        this.finishedNegotiations.delete(initiateRequest.contractOfferId);
+        this.runningNegotiations.set(initiateRequest.contractOfferId, {
+          id: uiContractNegotiation.contractNegotiationId,
+          offerId: initiateRequest.contractOfferId,
         });
 
         if (!this.pollingHandleNegotiation) {
@@ -114,11 +106,13 @@ export class ContractNegotiationService {
               this.getNegotiationState(negotiation.id).subscribe(
                 (updatedNegotiation) => {
                   if (
-                    finishedNegotiationStates.includes(updatedNegotiation.state)
+                    finishedNegotiationStates.includes(
+                      updatedNegotiation.state.name,
+                    )
                   ) {
                     let offerId = negotiation.offerId;
                     this.runningNegotiations.delete(offerId);
-                    if (updatedNegotiation.state === 'CONFIRMED') {
+                    if (updatedNegotiation.state.name === 'CONFIRMED') {
                       this.finishedNegotiations.set(
                         offerId,
                         updatedNegotiation,
@@ -149,15 +143,14 @@ export class ContractNegotiationService {
       },
     );
   }
+
   private initiateNegotiation(
     initiateDto: ContractNegotiationRequest,
-  ): Observable<string> {
-    return this.edcApiService
-      .initiateContractNegotiation(initiateDto)
-      .pipe(map((t) => t.id!));
+  ): Observable<UiContractNegotiation> {
+    return this.edcApiService.initiateContractNegotiation(initiateDto);
   }
 
-  private getNegotiationState(id: string): Observable<ContractNegotiationDto> {
-    return this.contractNegotiationService.getNegotiation(id);
+  private getNegotiationState(id: string): Observable<UiContractNegotiation> {
+    return this.edcApiService.getContractNegotiation(id);
   }
 }

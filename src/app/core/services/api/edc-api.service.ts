@@ -14,10 +14,6 @@ import {
   PolicyDefinitionCreateRequest,
   PolicyDefinitionPage,
   TransferHistoryPage,
-  UiAsset,
-  UiAssetCreateRequest,
-  UiContractNegotiation,
-  UiDataOffer,
   buildEdcClient,
 } from '@sovity.de/edc-client';
 import {APP_CONFIG, AppConfig} from '../../config/app-config';

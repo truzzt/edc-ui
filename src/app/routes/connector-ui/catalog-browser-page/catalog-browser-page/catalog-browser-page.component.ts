@@ -9,7 +9,6 @@ import {
   sampleTime,
 } from 'rxjs';
 import {filter, map} from 'rxjs/operators';
-import {UiDataOffer} from '@sovity.de/edc-client';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
 import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
 import {CatalogApiUrlService} from '../../../../core/services/api/catalog-api-url.service';
@@ -54,7 +53,7 @@ export class CatalogBrowserPageComponent implements OnInit, OnDestroy {
     this.presetProvidersMessage = this.buildPresetCatalogUrlsMessage();
   }
 
-  onContractOfferClick(contractOffer: UiDataOffer) {
+  onContractOfferClick(contractOffer: ContractOffer) {
     const data =
       this.assetDetailDialogDataService.contractOfferDetails(contractOffer);
     this.assetDetailDialogService

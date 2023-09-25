@@ -5,10 +5,6 @@ import {TransferHistoryEntry} from '@sovity.de/edc-client';
 import {CatalogApiUrlService} from '../../../../core/services/api/catalog-api-url.service';
 import {ContractOfferService} from '../../../../core/services/api/contract-offer.service';
 import {EdcApiService} from '../../../../core/services/api/edc-api.service';
-import {
-  ContractAgreementService,
-  ContractDefinitionService,
-} from '../../../../core/services/api/legacy-managent-api-client';
 import {ConnectorInfoPropertyGridGroupBuilder} from '../../../../core/services/connector-info-property-grid-group-builder';
 import {LastCommitInfoService} from '../../../../core/services/last-commit-info.service';
 import {Fetched} from '../../../../core/services/models/fetched';
@@ -20,8 +16,6 @@ export class DashboardPageDataService {
   constructor(
     private edcApiService: EdcApiService,
     private catalogBrowserService: ContractOfferService,
-    private contractDefinitionService: ContractDefinitionService,
-    private contractAgreementService: ContractAgreementService,
     private catalogApiUrlService: CatalogApiUrlService,
     private lastCommitInfoService: LastCommitInfoService,
     private connectorInfoPropertyGridGroupBuilder: ConnectorInfoPropertyGridGroupBuilder,
@@ -61,20 +55,18 @@ export class DashboardPageDataService {
   }
 
   private contractDefinitionKpis(): Observable<Partial<DashboardPageData>> {
-    return this.contractDefinitionService
-      .getAllContractDefinitions(0, 10_000_000)
-      .pipe(
-        map((contractDefinitions) => contractDefinitions.length),
-        Fetched.wrap({
-          failureMessage: 'Failed fetching number of contract definitions.',
-        }),
-        map((numContractDefinitions) => ({numContractDefinitions})),
-      );
+    return this.edcApiService.getContractDefinitionPage().pipe(
+      map((page) => page.contractDefinitions.length),
+      Fetched.wrap({
+        failureMessage: 'Failed fetching number of contract definitions.',
+      }),
+      map((numContractDefinitions) => ({numContractDefinitions})),
+    );
   }
 
   private contractAgreementKpis(): Observable<Partial<DashboardPageData>> {
-    return this.contractAgreementService.getAllAgreements(0, 10_000_000).pipe(
-      map((contractAgreements) => contractAgreements.length),
+    return this.edcApiService.getContractAgreementPage().pipe(
+      map((page) => page.contractAgreements.length),
       Fetched.wrap({
         failureMessage: 'Failed fetching contract agreements.',
       }),

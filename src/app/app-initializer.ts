@@ -11,15 +11,7 @@ export function keycloakInitializer() {
   const keycloak = new Keycloak(keycloakConfig);
 
   return () =>
-    keycloak
-      .init({ onLoad: 'login-required' })
-      .then((authenticated) => {
-        if (authenticated) {
-          // Keycloak authentication successful, proceed with the app initialization
-        } else {
-          // Handle authentication failure
-        }
-      });
+    keycloak.init({ onLoad: 'login-required' })
 }
 
 export const appInitializerProviders = [

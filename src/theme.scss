@@ -1,55 +1,50 @@
 @use '@angular/material' as mat;
-@use 'theme-colors' as sovityColors;
-@use 'theme-colors.mds' as mdsColors;
-@use 'theme-generated-variables' as themeGeneratedVars;
-
-// Import styles that aren't theme dependant (including typography)
 @import 'https://fonts.googleapis.com/icon?family=Material+Icons';
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+@import "~@angular/material/theming";
+@include mat-core();
+@import 'https://fonts.googleapis.com/icon?family=Material+Icons';
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
 
-$custom-typography: mat.define-typography-config(
-  $font-family: 'Open Sans',
+$theming-material-components-primary: mat-palette($mat-teal);
+$theming-material-components-accent: mat-palette($mat-orange, A200, A100, A400);
+$theming-material-components-warn: mat-palette($mat-red);
+
+$theming-material-components-theme: mat-dark-theme(
+    $theming-material-components-primary,
+    $theming-material-components-accent,
+    $theming-material-components-warn
 );
+
+@include angular-material-theme($theming-material-components-theme);
+
+
+$custom-typography: mat.define-typography-config($font-family: 'Montserrat');
 @include mat.core($custom-typography);
 
-// Import theme and theme-dependant styles
-.theme-sovity {
-  @include mat.all-component-themes(sovityColors.$theme);
-  @include themeGeneratedVars.theme-vars(
-    sovityColors.$theme,
-    sovityColors.$link-color
-  );
-}
-.theme-mds {
-  @include mat.all-component-themes(mdsColors.$theme);
-  @include themeGeneratedVars.theme-vars(
-    mdsColors.$theme,
-    mdsColors.$link-color
-  );
+
+.mat-sidenav-container{
+  background: #000000;
+  border: none;
 }
 
-// fix paginator background, it was white before, but our background is gray
-mat-paginator {
-  background: transparent !important;
+.mat-drawer {
+  background: #202020;
+  border: none;
+  width: 215px !important;
+  height: 555px;
+  border-radius: 16px;
+  margin-left: 0.7%;
+  margin-top: 10%;
 }
 
-// Fix Icon sizes used in card avatars
-mat-icon[mat-card-avatar] {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
+.mat-toolbar.mat-primary {
+  background: #0F0F0F;
+  display: none;
 }
 
-// Fix mat-chips exploding out and/or having multiline exploding strings
-mat-chip {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-// Fix Date range second-date-text being "higher" than first-date-text
-.mat-date-range-input-container {
-  align-items: unset !important;
+.mat-card {  
+  background-color: #202020;
+  color: white;
+  transition: background-color 0.3s;
 }

@@ -3,7 +3,7 @@ import {EdcUiThemeConfig} from './edc-ui-theme-config';
 export const SOVITY_THEME: EdcUiThemeConfig = {
   theme: 'theme-sovity',
   brandFaviconSrc: '/assets/images/sovity_favicon-192x192.png',
-  brandLogoSrc: '/assets/images/sovity_logo.svg',
+  brandLogoSrc: '/assets/images/truzzt-logo.svg',
   brandLogoStyle: 'width: 70%;',
 };
 

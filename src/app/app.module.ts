@@ -28,6 +28,24 @@ import {
   CONNECTOR_DATAMANAGEMENT_API,
 } from './core/services/api/legacy-managent-api-client';
 
+import Keycloak from 'keycloak-js';
+
+const keycloakConfig = {
+  url: 'https://auth.dev.truzzt.com',
+  realm: 'truzzt_id',
+  clientId: 'dashboard',
+};
+
+const keycloak = new Keycloak(keycloakConfig);
+
+keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
+  if (authenticated) {
+    //
+  } else {
+    //
+  }
+});
+
 @NgModule({
   imports: [
     // Angular

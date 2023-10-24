@@ -27,24 +27,9 @@ import {
   API_KEY,
   CONNECTOR_DATAMANAGEMENT_API,
 } from './core/services/api/legacy-managent-api-client';
+import { appInitializerProviders } from './app-initializer'; // Import the initializer
 
-import Keycloak from 'keycloak-js';
 
-const keycloakConfig = {
-  url: 'https://auth.dev.truzzt.com',
-  realm: 'truzzt_id',
-  clientId: 'dashboard',
-};
-
-const keycloak = new Keycloak(keycloakConfig);
-
-keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
-  if (authenticated) {
-    //
-  } else {
-    //
-  }
-});
 
 @NgModule({
   imports: [
@@ -52,7 +37,6 @@ keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
     BrowserAnimationsModule,
     BrowserModule,
     HttpClientModule,
-
     // Angular Material
     MatButtonModule,
     MatDatepickerModule,
@@ -76,6 +60,7 @@ keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
   declarations: [AppComponent, PageNotFoundComponent],
   providers: [
     provideAppConfig(),
+    appInitializerProviders,
 
     // Provide individual properties of config for better Angular Component APIs
     provideAppConfigProperty(CONNECTOR_DATAMANAGEMENT_API, 'managementApiUrl'),

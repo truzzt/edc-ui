@@ -1,10 +1,10 @@
 ## Security
 
-sovity GmbH takes the security of its software products and services seriously,
+truzzt GmbH takes the security of its software products and services seriously,
 which includes all source code repositories managed through our GitHub
-organization: [sovity](https://github.com/sovity).
+organization: [truzzt](https://github.com/truzzt).
 
-If you believe you have found a security vulnerability in any of sovity's owned
+If you believe you have found a security vulnerability in any of truzzt's owned
 repositories, please report it to us as described below.
 
 ## Reporting Security Issues

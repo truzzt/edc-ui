@@ -1,3 +1,5 @@
+# [1.0.0-alpha.2](https://github.com/truzzt/edc-ui/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2023-10-26)
+
 # 1.0.0-alpha.1 (2023-10-26)
 
 

@@ -1,7 +1,9 @@
 version: '3.8'
 services:
   edc-ui:
-    image: ghcr.io/sovity/edc-ui:latest
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
     ports:
       - '11000:80'
     environment:
@@ -17,11 +19,11 @@ services:
     environment:
       MY_EDC_NAME_KEBAB_CASE: 'example-connector'
       MY_EDC_TITLE: 'EDC Connector'
-      MY_EDC_DESCRIPTION: 'sovity Community Edition EDC Connector'
-      MY_EDC_CURATOR_URL: 'https://example.com'
-      MY_EDC_CURATOR_NAME: 'Example GmbH'
-      MY_EDC_MAINTAINER_URL: 'https://sovity.de'
-      MY_EDC_MAINTAINER_NAME: 'sovity GmbH'
+      MY_EDC_DESCRIPTION: 'getting started EDC Connector'
+      MY_EDC_CURATOR_URL: 'https://truzzt.eu'
+      MY_EDC_CURATOR_NAME: 'truzzt GmbH'
+      MY_EDC_MAINTAINER_URL: 'https://truzzt.eu'
+      MY_EDC_MAINTAINER_NAME: 'truzzt GmbH'
 
       # Data Management API Key
       EDC_API_AUTH_KEY: ApiKeyDefaultValue
@@ -43,17 +45,9 @@ services:
       - '11004:11004'
       - '11005:5005'
   postgresql:
-    image: docker.io/bitnami/postgresql:11
+    image: docker.io/bitnami/postgresql:15
     restart: always
     environment:
       POSTGRESQL_USERNAME: edc
       POSTGRESQL_PASSWORD: edc
       POSTGRESQL_DATABASE: edc
-    ports:
-      - '54321:5432'
-    volumes:
-      - 'postgresql:/bitnami/postgresql'
-
-volumes:
-  postgresql:
-    driver: local

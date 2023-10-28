@@ -3,8 +3,8 @@ import Keycloak from 'keycloak-js';
 
 export function keycloakInitializer() {
   const keycloakConfig = {
-    url: 'https://auth.dev.truzzt.com',
-    realm: 'truzzt_id',
+    url: 'https://auth.prod.truzzt.eu',
+    realm: 'TRUZZT_ID',
     clientId: 'dashboard',
   };
 

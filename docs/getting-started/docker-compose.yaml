@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   edc-ui:
+    # image: ghcr.io/truzzt/edc-ui:1.0.0-alpha.2
     build:
       context: ../../
       dockerfile: docker/Dockerfile

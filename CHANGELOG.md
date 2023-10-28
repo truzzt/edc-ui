@@ -1,3 +1,10 @@
+# [1.0.0-alpha.3](https://github.com/truzzt/edc-ui/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2023-10-28)
+
+
+### Bug Fixes
+
+* switched to new truzzt.eu auth server ([c3a384e](https://github.com/truzzt/edc-ui/commit/c3a384e885e27174f7bbec1dc4780f32b349d39e))
+
 # [1.0.0-alpha.2](https://github.com/truzzt/edc-ui/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2023-10-26)
 
 # 1.0.0-alpha.1 (2023-10-26)

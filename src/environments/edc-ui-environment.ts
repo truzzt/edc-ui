@@ -3,5 +3,5 @@
  */
 export interface EdcUiEnvironment {
   production: boolean;
-  keycloakRole: 'role1';
+  keycloakRole: string;
 }

@@ -14,6 +14,7 @@ import {EdcUiEnvironment} from './edc-ui-environment';
 
 export const environment: EdcUiEnvironment = {
   production: false,
+  keycloakRole: 'role1'
 };
 
 // Included with Angular CLI.

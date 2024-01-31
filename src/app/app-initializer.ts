@@ -1,17 +1,16 @@
 import { APP_INITIALIZER } from '@angular/core';
-import Keycloak from 'keycloak-js';
+import UserService from './user-service';
 
 export function keycloakInitializer() {
-  const keycloakConfig = {
-    url: 'https://auth.prod.truzzt.eu',
-    realm: 'TRUZZT_ID',
-    clientId: 'dashboard',
-  };
-
-  const keycloak = new Keycloak(keycloakConfig);
-
   return () =>
-    keycloak.init({ onLoad: 'login-required' })
+    UserService.initKeycloak().then((realmAccess) => {
+      if (!realmAccess || !realmAccess.roles || !realmAccess.roles.includes('role1')) {
+        UserService.doLogout();
+        return null;
+      } else {
+        return realmAccess;
+      }
+    });
 }
 
 export const appInitializerProviders = [

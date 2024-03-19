@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {PolicyDefinition} from '../../../../core/services/api/legacy-managent-api-client';
-import {Asset} from '../../../../core/services/models/asset';
-import {noWhitespaceValidator} from '../../../../core/validators/no-whitespace-validator';
+import {PolicyDefinitionDto} from '@sovity.de/edc-client';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
+import {noWhitespacesOrColonsValidator} from '../../../../core/validators/no-whitespaces-or-colons-validator';
 import {
   ContractDefinitionEditorDialogFormModel,
   ContractDefinitionEditorDialogFormValue,
@@ -26,10 +26,10 @@ export class ContractDefinitionEditorDialogForm {
 
   buildFormGroup(): FormGroup<ContractDefinitionEditorDialogFormModel> {
     return this.formBuilder.nonNullable.group({
-      id: ['', [Validators.required, noWhitespaceValidator]],
-      accessPolicy: [null as PolicyDefinition | null, Validators.required],
-      contractPolicy: [null as PolicyDefinition | null, Validators.required],
-      assets: [[] as Asset[], Validators.required],
+      id: ['', [Validators.required, noWhitespacesOrColonsValidator]],
+      accessPolicy: [null as PolicyDefinitionDto | null, Validators.required],
+      contractPolicy: [null as PolicyDefinitionDto | null, Validators.required],
+      assets: [[] as UiAssetMapped[], Validators.required],
     });
   }
 }

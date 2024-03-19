@@ -1,14 +1,21 @@
 import {Component, Inject, OnDestroy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {finalize} from 'rxjs/operators';
-import {ContractAgreementTransferRequest} from '@sovity.de/edc-client';
+import {
+  IdResponseDto,
+  InitiateCustomTransferRequest,
+  InitiateTransferRequest,
+} from '@sovity.de/edc-client';
 import {EdcApiService} from '../../../../core/services/api/edc-api.service';
-import {AssetEntryBuilder} from '../../../../core/services/asset-entry-builder';
 import {DataAddressMapper} from '../../../../core/services/data-address-mapper';
 import {HttpRequestParamsMapper} from '../../../../core/services/http-params-mapper.service';
 import {NotificationService} from '../../../../core/services/notification.service';
 import {ValidationMessages} from '../../../../core/validators/validation-messages';
+import {
+  DATA_SINK_HTTP_METHODS,
+  DATA_SOURCE_HTTP_METHODS,
+} from '../../asset-page/asset-edit-dialog/form/http-methods';
 import {ContractAgreementTransferDialogData} from './contract-agreement-transfer-dialog-data';
 import {ContractAgreementTransferDialogForm} from './contract-agreement-transfer-dialog-form';
 import {ContractAgreementTransferDialogFormValue} from './contract-agreement-transfer-dialog-form-model';
@@ -17,48 +24,48 @@ import {ContractAgreementTransferDialogResult} from './contract-agreement-transf
 @Component({
   selector: 'contract-agreement-transfer-dialog',
   templateUrl: './contract-agreement-transfer-dialog.component.html',
-  providers: [ContractAgreementTransferDialogForm, AssetEntryBuilder],
+  providers: [ContractAgreementTransferDialogForm],
 })
 export class ContractAgreementTransferDialogComponent implements OnDestroy {
   loading = false;
 
-  dataSinkMethods = ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'];
-  dataSourceMethods = ['GET', ...this.dataSinkMethods];
+  dataSinkMethods = DATA_SINK_HTTP_METHODS;
+  dataSourceMethods = DATA_SOURCE_HTTP_METHODS;
 
   get proxyMethod(): boolean {
     return (
       this.showAllHttpParameterizationFields ||
-      this.data.asset.httpProxyMethod == true
+      this.data.asset.httpDatasourceHintsProxyMethod == true
     );
   }
 
   get proxyPath(): boolean {
     return (
       this.showAllHttpParameterizationFields ||
-      this.data.asset.httpProxyPath == true
+      this.data.asset.httpDatasourceHintsProxyPath == true
     );
   }
 
   get proxyQueryParams(): boolean {
     return (
       this.showAllHttpParameterizationFields ||
-      this.data.asset.httpProxyQueryParams == true
+      this.data.asset.httpDatasourceHintsProxyQueryParams == true
     );
   }
 
   get proxyBody(): boolean {
     return (
       this.showAllHttpParameterizationFields ||
-      this.data.asset.httpProxyBody == true
+      this.data.asset.httpDatasourceHintsProxyBody == true
     );
   }
 
   get showHttpParameterizationToggleButton(): boolean {
     return (
-      this.data.asset.httpProxyMethod !== true ||
-      this.data.asset.httpProxyPath !== true ||
-      this.data.asset.httpProxyQueryParams !== true ||
-      this.data.asset.httpProxyBody !== true
+      this.data.asset.httpDatasourceHintsProxyMethod !== true ||
+      this.data.asset.httpDatasourceHintsProxyPath !== true ||
+      this.data.asset.httpDatasourceHintsProxyQueryParams !== true ||
+      this.data.asset.httpDatasourceHintsProxyBody !== true
     );
   }
 
@@ -84,8 +91,17 @@ export class ContractAgreementTransferDialogComponent implements OnDestroy {
     this.loading = true;
     this.form.all.disable();
 
-    this.edcApiService
-      .initiateTranfer(this.buildTransferRequest(this.form.value))
+    const value = this.form.value;
+    let request$: Observable<IdResponseDto>;
+    if (value.dataAddressType === 'Custom-Transfer-Process-Request') {
+      const request = this.buildCustomTransferRequest(value);
+      request$ = this.edcApiService.initiateCustomTransfer(request);
+    } else {
+      const request = this.buildTransferRequest(value);
+      request$ = this.edcApiService.initiateTransfer(request);
+    }
+
+    request$
       .pipe(
         finalize(() => {
           this.loading = false;
@@ -93,9 +109,9 @@ export class ContractAgreementTransferDialogComponent implements OnDestroy {
         }),
       )
       .subscribe({
-        next: (transferProcessId) =>
+        next: (response) =>
           this.close({
-            transferProcessId,
+            transferProcessId: response.id!,
             contractId: this.data.contractId,
           }),
         error: (err) => {
@@ -118,37 +134,29 @@ export class ContractAgreementTransferDialogComponent implements OnDestroy {
 
   private buildTransferRequest(
     value: ContractAgreementTransferDialogFormValue,
-  ): ContractAgreementTransferRequest {
-    if (value.dataAddressType === 'Custom-Transfer-Process-Request') {
-      const customJson: any = JSON.parse(
-        value.transferProcessRequest?.trim() ?? '',
-      );
-      customJson.assetId = this.data.asset.id;
-      customJson.contractId = this.data.contractId;
-      customJson.connectorAddress = this.data.asset.originator;
-
-      return {
-        type: 'CUSTOM_JSON',
-        customJson: JSON.stringify(customJson),
-      };
-    }
-
-    let transferRequestProperties =
+  ): InitiateTransferRequest {
+    const transferProcessProperties =
       this.httpRequestParamsMapper.encodeHttpProxyTransferRequestProperties(
         this.data.asset,
         value,
       );
 
-    let dataSinkProperties =
-      this.dataAddressMapper.buildDataAddressProperties(value).properties ?? {};
+    const dataSinkProperties =
+      this.dataAddressMapper.buildDataAddressProperties(value) ?? {};
 
     return {
-      type: 'PARAMS_ONLY',
-      params: {
-        contractAgreementId: this.data.contractId,
-        properties: transferRequestProperties,
-        dataSinkProperties,
-      },
+      contractAgreementId: this.data.contractId,
+      transferProcessProperties,
+      dataSinkProperties,
+    };
+  }
+
+  private buildCustomTransferRequest(
+    value: ContractAgreementTransferDialogFormValue,
+  ): InitiateCustomTransferRequest {
+    return {
+      contractAgreementId: this.data.contractId,
+      transferProcessRequestJsonLd: value.transferProcessRequest!,
     };
   }
 }

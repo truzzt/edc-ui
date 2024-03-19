@@ -14,34 +14,193 @@ the detailed section referring to by linking pull requests or issues.
 
 ### Detailed Changes
 
-#### Added
+#### Major
 
-#### Fixed
+#### Minor
 
-#### Removed
+#### Patch
 
-#### Fixed
+- Fixed an asset select issue resulting from a bad compare function
+- Asset: Fix double encoding of query params by disallowing '&' and '=' chars in
+  form field and sending them unencoded
 
-## [v0.0.1-milestone-8-sovity13] 31.08.2023
+#### Deployment Migration Notes
+
+## [v2.5.0] - 2024-02-28
 
 ### Overview
 
-MDS 1.2 Release: MS8 Release with fixes for both the Connector UI and Broker UI.
+Enable better integration of Broker UI and Authority Portal
 
 ### Detailed Changes
 
-#### Added
+#### Minor
+
+- Broker UI: Added query params for the connector endpoints filter
+
+#### Deployment Migration Notes
+
+_No special deployment migration steps required_
+
+## [v2.4.0] 2024-02-14
+
+### Overview
+
+MDS feature and bugfix release for Connector UI and Broker UI
+
+### Detailed Changes
+
+#### Minor
+
+- Added new MDS fields to assets
+
+#### Patch
+
+- Ensured GDPR compliance of Fonts usage
+- Fixed auth proxy issues
+
+#### Deployment Migration Notes
+
+_No special deployment migration steps required_
+
+## [v2.3.1] 2024-01-18
+
+### Overview
+
+Bugfix release for minor UI bugs
+
+### Detailed Changes
+
+#### Patch
+
+- Fixed "No Description" only showing sometimes in cards.
+
+#### Deployment Migration Notes
+
+_No special deployment migration steps required_
+
+## [v2.3.0] 2024-01-17
+
+### Overview
+
+MDS feature release for Connector UI and Broker UI
+
+### Detailed Changes
+
+#### Minor
+
+- Asset descriptions now support Markdown
+- Asset metadata is now editable
+- Negotiate button is no longer shown for own connector endpoints
+- Broker: Catalog now supports list view
+- Broker: Connectors page now shows organization names and connector IDs
+
+#### Patch
+
+- Improved handling of asset keywords in cards
+- EE: Fixed issues around logout page
+
+#### Deployment Migration Notes
+
+_No special deployment migration steps required_
+
+## [v2.2.0] 05.12.2023
+
+### Overview
+
+Aligned Participant ID / Connector ID and Connector Restricted Policy.
+
+### Detailed Changes
+
+#### Minor
+
+- MDS Connector UI: Renamed Participant IDs to MDS Connector IDs
+- Connector Restricted Policy now supports entry of multiple connectors.
+- New Transfer History Page Column: Participant ID / Connector ID
+
+#### Deployment Migration Notes
+
+_No special deployment migration steps required_
+
+## [v2.1.0] 17.11.2023
+
+### Overview
+
+Broker UI EDC 0 Upgrade and some Connector UI bugfixes.
+
+### Detailed Changes
+
+#### Minor
+
+- New optional marketing banner for MDS Basic Enterprise Edition Connectors.
+- Finalize Migrate Broker UI to EDC 0
+
+#### Patch
+
+- Improved visibility of buttons in "Create New Asset" and "Initiate Transfer"
+  Dialogs
+- Broker Server API now also has a type-safe fake backend.
+- Fix Data Category not being set correctly when creating assets.
+
+#### Deployment Migration Notes
+
+- Enterprise Edition only, MDS variants only: New optional config variable
+  `EDC_UI_SHOW_EE_BASIC_MARKETING=true`. Default `false`
+
+## [v2.0.0] 10.10.2023
+
+### Overview
+
+EDC 0 compatible version (Connector UI only).
+
+### Detailed Changes
+
+#### Major
+
+- Switched to semantic versioning
+- Migrated transfer history page to the api wrapper
+- Migrated contract definition page to the api wrapper
+- Migrated policy definition page to the api wrapper
+- Migrated asset page to the api wrapper
+- Migrated dashboard page to the api wrapper
+- The Docker Container now uses the port `8080` instead of ~~`80`~~.
+
+#### Minor
 
 - Added custom 404 pages to connector and broker ui
+- New Asset Property "Participant ID"
 
-#### Fixed
+#### Patch
 
+- Fixed HTTP Parameterization Hints not showing in Asset Details.
 - Removed 404-causing login polling from broker UI
-- Broker: Fixed popularity not logged when clicking on a data offer.
-- Broker: Fixed missing name in legal notice
 - Renamed button from cancel to close in json-dialogs
-- Added a workaround for our EDC UI image failing when requests contain large
-  cookies.
+- Broker: Fixed popularity not logged when clicking on a data offer
+- Broker: Fixed missing name in legal notice
+
+#### Deployment Migration Notes
+
+- The Docker Container now uses the port `8080` instead of ~~`80`~~.
+- The following ENV Vars were changed:
+  - ~~`EDC_UI_DATA_MANAGEMENT_API_URL`~~ became `EDC_UI_MANAGEMENT_API_URL`
+  - ~~`EDC_UI_DATA_MANAGEMENT_API_KEY`~~ became `EDC_UI_MANAGEMENT_API_KEY`
+- The following ENV Vars were removed and should not be specified anymore:
+  - `EDC_UI_CONNECTOR_ID`
+  - `EDC_UI_CONNECTOR_NAME`
+  - `EDC_UI_CURATOR_ORGANIZATION_NAME`
+  - `EDC_UI_CURATOR_URL`
+  - `EDC_UI_DAPS_OAUTH_JWKS_URL`
+  - `EDC_UI_DAPS_OAUTH_TOKEN_URL`
+  - `EDC_UI_IDS_DESCRIPTION`
+  - `EDC_UI_IDS_ID`
+  - `EDC_UI_IDS_TITLE`
+  - `EDC_UI_MAINTAINER_ORGANIZATION_NAME`
+  - `EDC_UI_MAINTAINER_URL`
+  - `EDC_UI_ASSET_PROP_ORIGINATOR_ORGANIZATION`
+  - `EDC_UI_ASSET_PROP_ORIGINATOR`
+- New **optional** ENV Vars:
+  - `NGINX_ACCESS_LOG`, default: `/dev/stdout`
+  - `NGINX_ERROR_LOG`, default: `/dev/stderr`
 
 ## [v0.0.1-milestone-8-sovity12] 12.07.2023
 
@@ -200,7 +359,7 @@ information is now displayed.
 
 #### Changed
 
-- Marked `EDC_UI_DATA_MANAGEMENT_API_URL` as deprecated in favor of
+- Marked `EDC_UI_MANAGEMENT_API_URL` as deprecated in favor of
   `EDC_UI_MANAGEMENT_API_URL`.
 - Marked `EDC_UI_DATA_MANAGEMENT_API_KEY` as deprecated in favor of
   `EDC_UI_MANAGEMENT_API_KEY`.

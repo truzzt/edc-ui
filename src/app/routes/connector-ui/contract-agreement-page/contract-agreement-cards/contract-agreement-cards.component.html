@@ -1,9 +1,7 @@
 <div class="flex flex-row flex-wrap gap-[16px] justify-start">
   <mat-card
-    *ngFor="
-      let card of contractAgreements;
-      trackBy: 'contractAgreementId' | trackByField
-    "
+    *ngFor="let card of contractAgreements"
+    trackByField="contractAgreementId"
     style="width: 400px; min-height: 120px">
     <mat-card-header>
       <mat-icon mat-card-avatar>
@@ -14,11 +12,11 @@
           class="link"
           href="javascript:void(0)"
           (click)="onContractAgreementClick(card)">
-          {{ card.asset.name }}
+          {{ card.asset.title }}
         </a>
       </mat-card-title>
       <mat-card-subtitle>
-        {{ card.asset.originatorOrganization }}
+        {{ card.asset.creatorOrganizationName }}
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content class="flex flex-col space-y-[16px]">
@@ -34,18 +32,6 @@
           <div class="text-slate text-sm uppercase tracking-wider">Signed</div>
           <div>
             <ago [date]="card.contractSigningDate"></ago>
-          </div>
-        </div>
-
-        <!-- Validity -->
-        <div class="flex flex-col">
-          <div class="text-slate text-sm uppercase tracking-wider">
-            Validity
-          </div>
-          <div>
-            <date [date]="card.contractStartDate"></date>
-            -
-            <date [date]="card.contractEndDate"></date>
           </div>
         </div>
 
@@ -66,7 +52,7 @@
           <div>
             <a
               class="link break-all"
-              target="_blank"
+              externalLink
               [attr.href]="card.counterPartyAddress"
               >{{ card.counterPartyAddress }}</a
             >
@@ -89,24 +75,16 @@
         </div>
       </div>
 
-      <!-- Description -->
-      <div
-        *ngIf="card.asset.description"
-        class="whitespace-pre-line truncate-lines-5">
-        {{ card.asset.description }}
-      </div>
+      <!-- Description Short Text -->
+      <truncated-short-description
+        [text]="card.asset.descriptionShortText"></truncated-short-description>
 
       <!-- Tag List -->
-      <div *ngIf="card.asset.keywords.length || card.asset.version">
-        <mat-chip-list aria-label="Tags">
-          <mat-chip *ngIf="card.asset.version" color="primary" selected>{{
-            card.asset.version
-          }}</mat-chip>
-          <mat-chip *ngFor="let keyword of card.asset.keywords">{{
-            keyword
-          }}</mat-chip>
-        </mat-chip-list>
-      </div>
+      <asset-card-tag-list
+        *ngIf="card.asset.keywords?.length || card.asset.version"
+        [keywords]="card.asset.keywords"
+        [version]="card.asset.version"
+        [numberOfKeywordsDisplayed]="5"></asset-card-tag-list>
     </mat-card-content>
   </mat-card>
 </div>

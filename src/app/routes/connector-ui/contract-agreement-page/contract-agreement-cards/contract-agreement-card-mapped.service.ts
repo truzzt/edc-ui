@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {ContractAgreementCard} from '@sovity.de/edc-client';
-import {AssetPropertyMapper} from '../../../../core/services/asset-property-mapper';
+import {AssetBuilder} from '../../../../core/services/asset-builder';
 import {assetSearchTargets, search} from '../../../../core/utils/search-utils';
 import {ContractAgreementCardMapped} from './contract-agreement-card-mapped';
 
 @Injectable({providedIn: 'root'})
 export class ContractAgreementCardMappedService {
-  constructor(private assetPropertyMapper: AssetPropertyMapper) {}
+  constructor(private assetBuilder: AssetBuilder) {}
 
   /**
    * Replace the asset with the parsed asset and add the other required fields of the UI model
@@ -18,9 +18,7 @@ export class ContractAgreementCardMappedService {
   buildContractAgreementCardMapped(
     contractAgreement: ContractAgreementCard,
   ): ContractAgreementCardMapped {
-    let asset = this.assetPropertyMapper.buildAssetFromProperties(
-      contractAgreement.asset.properties,
-    );
+    const asset = this.assetBuilder.buildAsset(contractAgreement.asset);
 
     return {
       ...contractAgreement,

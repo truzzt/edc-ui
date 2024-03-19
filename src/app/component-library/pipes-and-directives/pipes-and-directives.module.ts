@@ -3,10 +3,11 @@ import {NgModule} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {AutofocusDirective} from './directives/autofocus.direcitive';
+import {ExternalLinkDirective} from './directives/external-link.directive';
 import {RemoveClassDirective} from './directives/remove-class.directive';
+import {TrackByFieldDirective} from './directives/track-by-field.directive';
 import {CompareByFieldPipe} from './pipes/compare-by-field.pipe';
 import {IsActiveFeaturePipe} from './pipes/is-active-feature.pipe';
-import {TrackByFieldPipe} from './pipes/track-by-field.pipe';
 import {ValuesPipe} from './pipes/values.pipe';
 
 @NgModule({
@@ -21,17 +22,19 @@ import {ValuesPipe} from './pipes/values.pipe';
   declarations: [
     AutofocusDirective,
     CompareByFieldPipe,
+    ExternalLinkDirective,
     IsActiveFeaturePipe,
     RemoveClassDirective,
-    TrackByFieldPipe,
+    TrackByFieldDirective,
     ValuesPipe,
   ],
   exports: [
     AutofocusDirective,
     CompareByFieldPipe,
+    ExternalLinkDirective,
     IsActiveFeaturePipe,
     RemoveClassDirective,
-    TrackByFieldPipe,
+    TrackByFieldDirective,
     ValuesPipe,
   ],
 })

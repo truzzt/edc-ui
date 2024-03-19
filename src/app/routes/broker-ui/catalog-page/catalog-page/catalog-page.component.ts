@@ -1,22 +1,26 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
 import {PageEvent} from '@angular/material/paginator';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {BehaviorSubject, Subject} from 'rxjs';
-import {map, takeUntil} from 'rxjs/operators';
+import {filter, map, takeUntil} from 'rxjs/operators';
 import {Store} from '@ngxs/store';
 import {CatalogPageSortingItem} from '@sovity.de/broker-server-client';
+import {LocalStoredValue} from 'src/app/core/utils/local-stored-value';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
-import {AssetDetailDialogResult} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-result';
-import {AssetDetailDialogComponent} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.component';
+import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
+import {
+  ViewModeEnum,
+  isViewMode,
+} from '../../../../component-library/catalog/view-selection/view-mode-enum';
 import {BrokerServerApiService} from '../../../../core/services/api/broker-server-api.service';
-import {FilterValueSelectItem} from '../filter-value-select/filter-value-select-item';
-import {FilterValueSelectVisibleState} from '../filter-value-select/filter-value-select-visible-state';
+import {FilterBoxItem} from '../filter-box/filter-box-item';
+import {FilterBoxVisibleState} from '../filter-box/filter-box-visible-state';
 import {CatalogActiveFilterPill} from '../state/catalog-active-filter-pill';
 import {CatalogPage} from '../state/catalog-page-actions';
 import {CatalogPageState} from '../state/catalog-page-state';
 import {CatalogPageStateModel} from '../state/catalog-page-state-model';
-import {BrokerDataOffer} from './mapping/broker-data-offer';
+import {CatalogDataOfferMapped} from './mapping/catalog-page-result-mapped';
 
 @Component({
   selector: 'catalog-page',
@@ -28,24 +32,47 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
   @HostBinding('class.p-[20px]')
   @HostBinding('class.space-x-[20px]')
   cls = true;
-
   state!: CatalogPageStateModel;
   searchText = new FormControl('');
   sortBy = new FormControl<CatalogPageSortingItem | null>(null);
+  viewModeEnum = ViewModeEnum;
+  viewMode = new LocalStoredValue<ViewModeEnum>(
+    ViewModeEnum.GRID,
+    'brokerui.viewMode',
+    isViewMode,
+  );
   private fetch$ = new BehaviorSubject(null);
+
+  // only tracked to prevent the component from resetting
+  expandedFilterId = '';
 
   constructor(
     private assetDetailDialogDataService: AssetDetailDialogDataService,
-    private matDialog: MatDialog,
+    private assetDetailDialogService: AssetDetailDialogService,
     private brokerServerApiService: BrokerServerApiService,
     private store: Store,
+    private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(CatalogPage.Reset);
+    this.initializePage();
     this.startListeningToStore();
     this.startEmittingSearchText();
     this.startEmittingSortBy();
+  }
+
+  private initializePage() {
+    const endpoints = this.parseConnectorEndpoints(
+      this.route.snapshot.queryParams,
+    );
+    this.store.dispatch(new CatalogPage.Reset(endpoints));
+
+    if (endpoints.length) {
+      this.expandedFilterId = 'connectorEndpoint';
+      // remove query params from url
+      this.router.navigate([]);
+    }
   }
 
   private startListeningToStore() {
@@ -59,6 +86,10 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
         }
         if (this.sortBy.value?.sorting !== state.activeSorting?.sorting) {
           this.sortBy.setValue(state.activeSorting);
+        }
+        if (!this.expandedFilterId && this.state.fetchedData.isReady) {
+          this.expandedFilterId =
+            this.state.fetchedData.data.availableFilters.fields[0].id;
         }
       });
   }
@@ -83,7 +114,18 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  onDataOfferClick(dataOffer: BrokerDataOffer) {
+  private parseConnectorEndpoints(params: Params): string[] {
+    if (!('connectorEndpoint' in params)) {
+      return [];
+    }
+    const endpoints = params.connectorEndpoint;
+    return Array.isArray(endpoints) ? [...new Set(endpoints)] : [endpoints];
+  }
+
+  onDataOfferClick(dataOffer: CatalogDataOfferMapped) {
+    const data =
+      this.assetDetailDialogDataService.brokerDataOfferDetails(dataOffer);
+
     // Call the detail dialog endpoint so the view count is increased
     this.brokerServerApiService
       .dataOfferDetailPage({
@@ -92,14 +134,10 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
       })
       .subscribe();
 
-    const data =
-      this.assetDetailDialogDataService.brokerDataOfferDetails(dataOffer);
-    const ref = this.matDialog.open(AssetDetailDialogComponent, {data});
-    ref.afterClosed().subscribe((result: AssetDetailDialogResult) => {
-      if (result?.refreshList) {
-        this.fetch$.next(null);
-      }
-    });
+    this.assetDetailDialogService
+      .open(data, this.ngOnDestroy$)
+      .pipe(filter((it) => !!it?.refreshList))
+      .subscribe(() => this.fetch$.next(null));
   }
 
   ngOnDestroy$ = new Subject();
@@ -110,8 +148,8 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
   }
 
   onSelectedItemsChange(
-    filter: FilterValueSelectVisibleState,
-    newSelectedItems: FilterValueSelectItem[],
+    filter: FilterBoxVisibleState,
+    newSelectedItems: FilterBoxItem[],
   ) {
     this.store.dispatch(
       new CatalogPage.UpdateFilterSelectedItems(
@@ -121,10 +159,7 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  onSearchTextChange(
-    filter: FilterValueSelectVisibleState,
-    newSearchText: string,
-  ) {
+  onSearchTextChange(filter: FilterBoxVisibleState, newSearchText: string) {
     this.store.dispatch(
       new CatalogPage.UpdateFilterSearchText(filter.model.id, newSearchText),
     );
@@ -136,5 +171,11 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
 
   onPageChange(event: PageEvent) {
     this.store.dispatch(new CatalogPage.UpdatePage(event.pageIndex));
+  }
+
+  onExpandedFilterChange(filterId: string, expanded: boolean) {
+    if (expanded) {
+      this.expandedFilterId = filterId;
+    }
   }
 }

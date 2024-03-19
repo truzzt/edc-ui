@@ -2,16 +2,11 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
-import {
-  AssetService,
-  ContractDefinitionService,
-  PolicyDefinition,
-  PolicyService,
-} from '../../../../core/services/api/legacy-managent-api-client';
-import {AssetEntryBuilder} from '../../../../core/services/asset-entry-builder';
-import {AssetPropertyMapper} from '../../../../core/services/asset-property-mapper';
+import {PolicyDefinitionDto} from '@sovity.de/edc-client';
+import {EdcApiService} from '../../../../core/services/api/edc-api.service';
+import {AssetService} from '../../../../core/services/asset.service';
 import {ContractDefinitionBuilder} from '../../../../core/services/contract-definition-builder';
-import {Asset} from '../../../../core/services/models/asset';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
 import {NotificationService} from '../../../../core/services/notification.service';
 import {ValidationMessages} from '../../../../core/validators/validation-messages';
 import {ContractDefinitionEditorDialogForm} from './contract-definition-editor-dialog-form';
@@ -20,39 +15,35 @@ import {ContractDefinitionEditorDialogResult} from './contract-definition-editor
 @Component({
   selector: 'contract-definition-editor-dialog',
   templateUrl: './contract-definition-editor-dialog.component.html',
-  providers: [ContractDefinitionEditorDialogForm, AssetEntryBuilder],
+  providers: [ContractDefinitionEditorDialogForm],
 })
 export class ContractDefinitionEditorDialog implements OnInit, OnDestroy {
-  policies: PolicyDefinition[] = [];
-  assets: Asset[] = [];
+  policies: PolicyDefinitionDto[] = [];
+  assets: UiAssetMapped[] = [];
   loading = false;
 
   constructor(
+    private assetServiceMapped: AssetService,
     public form: ContractDefinitionEditorDialogForm,
     private notificationService: NotificationService,
-    private policyService: PolicyService,
-    private assetService: AssetService,
-    private assetPropertyMapper: AssetPropertyMapper,
-    private contractDefinitionService: ContractDefinitionService,
+    private edcApiService: EdcApiService,
     private contractDefinitionBuilder: ContractDefinitionBuilder,
     private dialogRef: MatDialogRef<ContractDefinitionEditorDialog>,
     public validationMessages: ValidationMessages,
   ) {}
 
   ngOnInit() {
-    this.policyService
-      .getAllPolicies(0, 10_000_000)
+    this.edcApiService
+      .getPolicyDefinitionPage()
       .pipe(takeUntil(this.ngOnDestroy$))
-      .subscribe((polices) => {
-        this.policies = polices;
+      .subscribe((policyDefinitionPage) => {
+        this.policies = policyDefinitionPage.policies;
       });
-    this.assetService
-      .getAllAssets(0, 10_000_000)
+    this.assetServiceMapped
+      .fetchAssets()
       .pipe(takeUntil(this.ngOnDestroy$))
       .subscribe((assets) => {
-        this.assets = assets.map((it) =>
-          this.assetPropertyMapper.buildAssetFromProperties(it.properties),
-        );
+        this.assets = assets;
       });
   }
 
@@ -60,9 +51,8 @@ export class ContractDefinitionEditorDialog implements OnInit, OnDestroy {
     const formValue = this.form.value;
     const contractDefinition =
       this.contractDefinitionBuilder.buildContractDefinition(formValue);
-    this.form.group.disable();
     this.loading = true;
-    this.contractDefinitionService
+    this.edcApiService
       .createContractDefinition(contractDefinition)
       .pipe(
         takeUntil(this.ngOnDestroy$),

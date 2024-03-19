@@ -6,6 +6,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatDividerModule} from '@angular/material/divider';
@@ -24,7 +25,9 @@ import {DataAddressModule} from '../../../component-library/data-address/data-ad
 import {PipesAndDirectivesModule} from '../../../component-library/pipes-and-directives/pipes-and-directives.module';
 import {UiElementsModule} from '../../../component-library/ui-elements/ui-elements.module';
 import {AssetCardsComponent} from './asset-cards/asset-cards.component';
-import {AssetCreateDialogComponent} from './asset-create-dialog/asset-create-dialog.component';
+import {AssetEditDialogComponent} from './asset-edit-dialog/asset-edit-dialog.component';
+import {AssetEditDialogService} from './asset-edit-dialog/asset-edit-dialog.service';
+import {AssetEditDialogFormMapper} from './asset-edit-dialog/form/asset-edit-dialog-form-mapper';
 import {AssetPageComponent} from './asset-page/asset-page.component';
 import {DataCategorySelectComponent} from './data-category-select/data-category-select.component';
 import {DataSubcategoryItemsPipe} from './data-subcategory-select/data-subcategory-items.pipe';
@@ -59,6 +62,7 @@ import {TransportModeSelectComponent} from './transport-mode-select/transport-mo
     MatInputModule,
     MatIconModule,
     MatDialogModule,
+    MatNativeDateModule,
 
     // EDC UI Modules
     CatalogModule,
@@ -68,7 +72,7 @@ import {TransportModeSelectComponent} from './transport-mode-select/transport-mo
   ],
   declarations: [
     AssetCardsComponent,
-    AssetCreateDialogComponent,
+    AssetEditDialogComponent,
     AssetPageComponent,
     DataCategorySelectComponent,
     DataSubcategorySelectComponent,
@@ -78,5 +82,6 @@ import {TransportModeSelectComponent} from './transport-mode-select/transport-mo
     TransportModeSelectComponent,
   ],
   exports: [AssetPageComponent],
+  providers: [AssetEditDialogService, AssetEditDialogFormMapper],
 })
 export class AssetPageModule {}

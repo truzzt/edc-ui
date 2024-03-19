@@ -1,9 +1,6 @@
-import {Asset} from './asset';
-import {ContractOfferDto} from './contract-offer-dto';
+import {UiContractOffer} from '@sovity.de/edc-client';
+import {PropertyGridField} from '../../../component-library/property-grid/property-grid/property-grid-field';
 
-/**
- * Contract Offer (UI Dto)
- */
-export type ContractOffer = Omit<ContractOfferDto, 'asset'> & {
-  asset: Asset;
+export type ContractOffer = UiContractOffer & {
+  properties: PropertyGridField[];
 };

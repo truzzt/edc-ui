@@ -8,8 +8,6 @@ import {MatListModule} from '@angular/material/list';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatToolbarModule} from '@angular/material/toolbar';
-import {AssetDetailDialogDataService} from '../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
-import {AssetPropertyGridGroupBuilder} from '../../component-library/catalog/asset-detail-dialog/asset-property-grid-group-builder';
 import {PipesAndDirectivesModule} from '../../component-library/pipes-and-directives/pipes-and-directives.module';
 import {UiElementsModule} from '../../component-library/ui-elements/ui-elements.module';
 import {AssetPageModule} from './asset-page/asset-page.module';
@@ -19,6 +17,7 @@ import {ConnectorUiComponent} from './connector-ui.component';
 import {ContractAgreementPageModule} from './contract-agreement-page/contract-agreement-page.module';
 import {ContractDefinitionPageModule} from './contract-definition-page/contract-definition-page.module';
 import {DashboardPageModule} from './dashboard-page/dashboard-page.module';
+import {LocationHistoryUtils} from './logout-page/location-history-utils';
 import {LogoutPageModule} from './logout-page/logout-page.module';
 import {PreviousRouteListener} from './logout-page/previous-route-listener';
 import {PolicyDefinitionPageModule} from './policy-definition-page/policy-definition-page.module';
@@ -57,11 +56,7 @@ import {TransferHistoryPageModule} from './transfer-history-page/transfer-histor
     ConnectorUiRoutingModule,
   ],
   declarations: [ConnectorUiComponent],
-  providers: [
-    PreviousRouteListener,
-    AssetPropertyGridGroupBuilder,
-    AssetDetailDialogDataService,
-  ],
+  providers: [PreviousRouteListener, LocationHistoryUtils],
 })
 export class ConnectorUiModule {
   constructor(previousRouteListener: PreviousRouteListener) {

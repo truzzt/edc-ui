@@ -42,6 +42,17 @@ $custom-typography: mat.define-typography-config($font-family: 'Montserrat');
   background: #0F0F0F;
   display: none;
 }
+// Fix Icon sizes used in card avatars
+mat-icon[mat-card-avatar],
+.mat-card-avatar-icon {
+  font-size: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  margin-top: 1px;
+  margin-right: -3px;
+  margin-left: 2px;
+}
 
 .mat-card {  
   background-color: #202020;

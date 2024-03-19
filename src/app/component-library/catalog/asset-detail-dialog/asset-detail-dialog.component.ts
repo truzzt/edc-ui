@@ -6,9 +6,10 @@ import {
 } from '@angular/material/dialog';
 import {Observable, Subject, isObservable} from 'rxjs';
 import {filter, finalize, takeUntil} from 'rxjs/operators';
-import {ContractNegotiationService} from '../../../core/services/api/contract-negotiation.service';
-import {AssetService} from '../../../core/services/api/legacy-managent-api-client';
-import {Asset} from '../../../core/services/models/asset';
+import {UiContractOffer} from '@sovity.de/edc-client';
+import {EdcApiService} from '../../../core/services/api/edc-api.service';
+import {ContractNegotiationService} from '../../../core/services/contract-negotiation.service';
+import {UiAssetMapped} from '../../../core/services/models/ui-asset-mapped';
 import {NotificationService} from '../../../core/services/notification.service';
 import {ContractAgreementTransferDialogData} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-transfer-dialog/contract-agreement-transfer-dialog-data';
 import {ContractAgreementTransferDialogComponent} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-transfer-dialog/contract-agreement-transfer-dialog.component';
@@ -34,24 +35,29 @@ import {AssetDetailDialogResult} from './asset-detail-dialog-result';
 })
 export class AssetDetailDialogComponent implements OnDestroy {
   data!: AssetDetailDialogData;
-  asset!: Asset;
+  asset!: UiAssetMapped;
   propGroups!: PropertyGridGroup[];
 
   loading = false;
 
-  get negotiationState(): 'ready' | 'negotiating' | 'negotiated' {
-    const contractOffer = this.data.contractOffer!;
-    if (this.contractNegotiationService.isNegotiated(contractOffer)) {
-      return 'negotiated';
-    } else if (this.contractNegotiationService.isBusy(contractOffer)) {
-      return 'negotiating';
+  get showProgressBar(): boolean {
+    switch (this.data.type) {
+      case 'data-offer':
+        return (
+          this.data.dataOffer?.contractOffers?.some((it) =>
+            this.contractNegotiationService.isBusy(it),
+          ) ?? false
+        );
+      case 'contract-agreement':
+        return this.data.contractAgreement!.isInProgress;
+      default:
+        return false;
     }
-    return 'ready';
   }
 
   constructor(
+    private edcApiService: EdcApiService,
     private notificationService: NotificationService,
-    private assetService: AssetService,
     private matDialog: MatDialog,
     private matDialogRef: MatDialogRef<AssetDetailDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
@@ -73,19 +79,28 @@ export class AssetDetailDialogComponent implements OnDestroy {
     this.propGroups = this.data.propertyGridGroups;
   }
 
+  onEditClick() {
+    if (this.data.onAssetEditClick) {
+      this.data.onAssetEditClick(this.data.asset, (data) => this.setData(data));
+    }
+  }
+
   onDeleteClick() {
     this.confirmDelete().subscribe(() => {
       this.blockingRequest({
-        successMessage: `Deleted asset ${this.asset.id}.`,
-        failureMessage: `Failed deleting asset ${this.asset.id}.`,
+        successMessage: `Deleted asset ${this.asset.assetId}.`,
+        failureMessage: `Failed deleting asset ${this.asset.assetId}.`,
         onsuccess: () => this.close({refreshList: true}),
-        req: () => this.assetService.removeAsset(this.asset.id),
+        req: () => this.edcApiService.deleteAsset(this.asset.assetId),
       });
     });
   }
 
-  onNegotiateClick() {
-    this.contractNegotiationService.negotiate(this.data.contractOffer!);
+  onNegotiateClick(contractOffer: UiContractOffer) {
+    this.contractNegotiationService.negotiate(
+      this.data.dataOffer!,
+      contractOffer,
+    );
   }
 
   onTransferClick() {
@@ -99,10 +114,7 @@ export class AssetDetailDialogComponent implements OnDestroy {
   }
 
   private confirmDelete(): Observable<boolean> {
-    const dialogData = ConfirmDialogModel.forDelete(
-      'asset',
-      `"${this.asset.name}"`,
-    );
+    const dialogData = ConfirmDialogModel.forDelete('asset', this.asset.title);
     const ref = this.matDialog.open(ConfirmationDialogComponent, {
       maxWidth: '20%',
       data: dialogData,

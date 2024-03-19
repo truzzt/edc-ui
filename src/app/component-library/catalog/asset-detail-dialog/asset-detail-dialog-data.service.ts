@@ -1,11 +1,13 @@
 import {Injectable} from '@angular/core';
-import {Asset} from '../../../core/services/models/asset';
-import {ContractOffer} from '../../../core/services/models/contract-offer';
-import {BrokerDataOffer} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
+import {DataOffer} from '../../../core/services/models/data-offer';
+import {UiAssetMapped} from '../../../core/services/models/ui-asset-mapped';
+import {CatalogDataOfferMapped} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/catalog-page-result-mapped';
 import {ContractAgreementCardMapped} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
-import {AssetDetailDialogData} from './asset-detail-dialog-data';
+import {
+  AssetDetailDialogData,
+  OnAssetEditClickFn,
+} from './asset-detail-dialog-data';
 import {AssetPropertyGridGroupBuilder} from './asset-property-grid-group-builder';
-import {getLegacyPolicy} from './policy-utils';
 
 @Injectable()
 export class AssetDetailDialogDataService {
@@ -13,7 +15,7 @@ export class AssetDetailDialogDataService {
     private assetPropertyGridGroupBuilder: AssetPropertyGridGroupBuilder,
   ) {}
 
-  assetDetails(asset: Asset, allowDelete: boolean): AssetDetailDialogData {
+  assetDetailsReadonly(asset: UiAssetMapped): AssetDetailDialogData {
     const propertyGridGroups = [
       this.assetPropertyGridGroupBuilder.buildAssetPropertiesGroup(asset, null),
       this.assetPropertyGridGroupBuilder.buildAdditionalPropertiesGroup(asset),
@@ -22,28 +24,33 @@ export class AssetDetailDialogDataService {
     return {
       type: 'asset-details',
       asset,
-      showDeleteButton: allowDelete,
       propertyGridGroups,
     };
   }
 
-  contractOfferDetails(contractOffer: ContractOffer): AssetDetailDialogData {
-    let asset = contractOffer.asset;
-    let contractPolicy = contractOffer.policy;
+  assetDetailsEditable(
+    asset: UiAssetMapped,
+    opts: {onAssetEditClick: OnAssetEditClickFn},
+  ): AssetDetailDialogData {
+    return {
+      ...this.assetDetailsReadonly(asset),
+      showDeleteButton: true,
+      showEditButton: true,
+      onAssetEditClick: opts.onAssetEditClick,
+    };
+  }
 
+  dataOfferDetails(dataOffer: DataOffer): AssetDetailDialogData {
+    const asset = dataOffer.asset;
     const propertyGridGroups = [
       this.assetPropertyGridGroupBuilder.buildAssetPropertiesGroup(asset, null),
       this.assetPropertyGridGroupBuilder.buildAdditionalPropertiesGroup(asset),
-      this.assetPropertyGridGroupBuilder.buildPolicyGroup(
-        asset,
-        contractPolicy,
-      ),
     ].filter((it) => it.properties.length);
 
     return {
-      type: 'contract-offer',
-      asset: contractOffer.asset,
-      contractOffer,
+      type: 'data-offer',
+      asset: asset,
+      dataOffer,
       propertyGridGroups,
     };
   }
@@ -51,16 +58,15 @@ export class AssetDetailDialogDataService {
   contractAgreementDetails(
     contractAgreement: ContractAgreementCardMapped,
   ): AssetDetailDialogData {
-    let asset = contractAgreement.asset;
-    let contractPolicy = getLegacyPolicy(contractAgreement.contractPolicy);
+    const asset = contractAgreement.asset;
 
     const propertyGridGroups = [
       this.assetPropertyGridGroupBuilder.buildContractAgreementGroup(
         contractAgreement,
       ),
-      this.assetPropertyGridGroupBuilder.buildPolicyGroup(
-        asset,
-        contractPolicy,
+      this.assetPropertyGridGroupBuilder.buildContractPolicyGroup(
+        contractAgreement.contractPolicy,
+        asset.title,
       ),
       this.assetPropertyGridGroupBuilder.buildAssetPropertiesGroup(
         asset,
@@ -77,8 +83,10 @@ export class AssetDetailDialogDataService {
     };
   }
 
-  brokerDataOfferDetails(dataOffer: BrokerDataOffer): AssetDetailDialogData {
-    let asset = dataOffer.asset;
+  brokerDataOfferDetails(
+    dataOffer: CatalogDataOfferMapped,
+  ): AssetDetailDialogData {
+    const asset = dataOffer.asset;
 
     const propertyGridGroups = [
       this.assetPropertyGridGroupBuilder.buildBrokerDataOfferGroup(dataOffer),
@@ -88,7 +96,7 @@ export class AssetDetailDialogDataService {
       ),
       this.assetPropertyGridGroupBuilder.buildAdditionalPropertiesGroup(asset),
       ...dataOffer.contractOffers.map((contractOffer, i) =>
-        this.assetPropertyGridGroupBuilder.buildContractOfferGroup(
+        this.assetPropertyGridGroupBuilder.buildBrokerContractOfferGroup(
           asset,
           contractOffer,
           i,

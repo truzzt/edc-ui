@@ -1,16 +1,13 @@
 import {Injectable} from '@angular/core';
 import {
-  ContractDefinitionDto,
-  Criterion,
-  PolicyDefinition,
-  policyDefinitionId,
-} from '../../../../core/services/api/legacy-managent-api-client';
-import {
-  Operator,
-  OperatorSymbols,
-} from '../../../../core/services/api/policy-type-ext';
-import {AssetProperties} from '../../../../core/services/asset-properties';
-import {Asset} from '../../../../core/services/models/asset';
+  ContractDefinitionEntry,
+  ContractDefinitionPage,
+  PolicyDefinitionDto,
+  UiCriterion,
+} from '@sovity.de/edc-client';
+import {CRITERION_OPERATOR_SYMBOLS} from '../../../../core/services/api/model/criterion-type-ext';
+import {AssetProperty} from '../../../../core/services/models/asset-properties';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
 import {associateBy} from '../../../../core/utils/map-utils';
 import {assetSearchTargets} from '../../../../core/utils/search-utils';
 import {
@@ -22,32 +19,33 @@ import {
 @Injectable({providedIn: 'root'})
 export class ContractDefinitionCardBuilder {
   buildContractDefinitionCards(
-    contractDefinitions: ContractDefinitionDto[],
-    assets: Asset[],
-    policyDefinitions: PolicyDefinition[],
+    contractDefinitionPage: ContractDefinitionPage,
+    assets: UiAssetMapped[],
+    policyDefinitions: PolicyDefinitionDto[],
   ): ContractDefinitionCard[] {
-    const assetById = associateBy(assets, (asset) => asset.id);
+    const assetById = associateBy(assets, (asset) => asset.assetId);
     const policyDefinitionById = associateBy(
       policyDefinitions,
-      policyDefinitionId,
+      (policyDefinition) => policyDefinition.policyDefinitionId,
     );
 
-    return contractDefinitions.map((contractDefinition) =>
-      this.buildContractDefinitionCard(
-        contractDefinition,
-        assetById,
-        policyDefinitionById,
-      ),
+    return contractDefinitionPage.contractDefinitions.map(
+      (contractDefinition) =>
+        this.buildContractDefinitionCard(
+          contractDefinition,
+          assetById,
+          policyDefinitionById,
+        ),
     );
   }
 
   buildContractDefinitionCard(
-    contractDefinition: ContractDefinitionDto,
-    assetById: Map<string, Asset>,
-    policyDefinitionById: Map<string, PolicyDefinition>,
+    contractDefinition: ContractDefinitionEntry,
+    assetById: Map<string, UiAssetMapped>,
+    policyDefinitionById: Map<string, PolicyDefinitionDto>,
   ): ContractDefinitionCard {
     return {
-      id: contractDefinition.id,
+      id: contractDefinition.contractDefinitionId,
       contractPolicy: this.extractPolicy(
         contractDefinition.contractPolicyId,
         policyDefinitionById,
@@ -57,7 +55,7 @@ export class ContractDefinitionCardBuilder {
         policyDefinitionById,
       ),
 
-      criteria: contractDefinition.criteria.map((criterion) => ({
+      criteria: contractDefinition.assetSelector.map((criterion) => ({
         label: this.extractCriterionOperation(criterion),
         values: this.extractCriterionValues(criterion, assetById),
       })),
@@ -67,7 +65,7 @@ export class ContractDefinitionCardBuilder {
 
   private extractPolicy(
     policyDefinitionId: string,
-    policyDefinitionsById: Map<string, PolicyDefinition>,
+    policyDefinitionsById: Map<string, PolicyDefinitionDto>,
   ): ContractDefinitionCardPolicy {
     return {
       policyDefinitionId: policyDefinitionId,
@@ -75,59 +73,54 @@ export class ContractDefinitionCardBuilder {
     };
   }
 
-  private extractCriterionOperation(criterion: Criterion): string {
-    const {operandLeft} = criterion;
+  private extractCriterionOperation(criterion: UiCriterion): string {
+    const {operandLeft, operator} = criterion;
     if (
-      operandLeft.toLowerCase() === AssetProperties.id &&
-      (criterion.operator.toUpperCase() === 'EQ' ||
-        criterion.operator.toUpperCase() === 'IN')
+      operandLeft === AssetProperty.id &&
+      (operator === 'EQ' || operator === 'IN')
     ) {
       return 'Assets';
     }
 
-    let operator =
-      OperatorSymbols[criterion.operator as Operator] ?? criterion.operator;
-    return `${operandLeft} ${operator}`;
+    const operatorStr = CRITERION_OPERATOR_SYMBOLS[operator] ?? operator;
+    return `${operandLeft} ${operatorStr}`;
   }
 
   private extractCriterionValues(
-    criterion: Criterion,
-    assetsById: Map<string, Asset>,
+    criterion: UiCriterion,
+    assetsById: Map<string, UiAssetMapped>,
   ): ContractDefinitionCardCriterionValue[] {
-    let {operandLeft, operandRight} = criterion;
+    const {operandLeft, operandRight} = criterion;
 
-    let values: (object | string)[] = [];
-    if (Array.isArray(operandRight)) {
-      values = operandRight as string[];
+    let values: string[] = [];
+    if (operandRight.type === 'VALUE_LIST') {
+      values = operandRight.valueList ?? [];
     } else {
-      values = [operandRight];
+      values = [operandRight.value!!];
     }
 
     return values.map((it) => {
-      if (typeof it === 'string') {
-        const stringType: ContractDefinitionCardCriterionValue = {
-          type: 'string',
-          value: it,
-          searchTargets: [it],
-        };
+      const stringType: ContractDefinitionCardCriterionValue = {
+        type: 'string',
+        value: it,
+        searchTargets: [it],
+      };
 
-        // Try to find asset
-        if (operandLeft === AssetProperties.id) {
-          let asset = assetsById.get(it);
-          if (asset) {
-            return {
-              type: 'asset',
-              asset,
-              searchTargets: assetSearchTargets(asset),
-            };
-          }
+      // Try to find asset
+      if (operandLeft === AssetProperty.id) {
+        const asset = assetsById.get(it);
+        if (asset) {
+          return {
+            type: 'asset',
+            asset,
+            searchTargets: assetSearchTargets(asset),
+          };
         }
 
         return stringType;
       }
 
-      // fall back to JSON for generic objects
-      return {type: 'json', json: it, searchTargets: [JSON.stringify(it)]};
+      return stringType;
     });
   }
 }

@@ -27,24 +27,14 @@ export interface AppConfig {
   brandLogoStyle: string;
 
   // EDC Backend Endpoints
-  connectorEndpoint: string;
   managementApiUrl: string;
   managementApiKey: string;
   logoutUrl: string; // requires feature flag logout-button
 
   // Other EDC Backend Endpoints
   catalogUrls: string;
+  useFakeBackend: boolean;
 
-  // Connector Self-Description
-  connectorId: string;
-  connectorName: string;
-  connectorIdsId: string;
-  connectorIdsTitle: string;
-  connectorIdsDescription: string;
-  curatorUrl: string;
-  curatorOrganizationName: string;
-  dapsOauthTokenUrl: string;
-  dapsOauthJwksUrl: string;
-  maintainerUrl: string;
-  maintainerOrganizationName: string;
+  // Enterprise Edition
+  showEeBasicMarketing: boolean;
 }

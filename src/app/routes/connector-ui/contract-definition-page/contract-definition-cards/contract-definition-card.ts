@@ -1,8 +1,8 @@
 import {
-  ContractDefinitionDto,
-  PolicyDefinition,
-} from '../../../../core/services/api/legacy-managent-api-client';
-import {Asset} from '../../../../core/services/models/asset';
+  ContractDefinitionEntry,
+  PolicyDefinitionDto,
+} from '@sovity.de/edc-client';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
 
 export interface ContractDefinitionCard {
   id: string;
@@ -10,12 +10,12 @@ export interface ContractDefinitionCard {
   contractPolicy: ContractDefinitionCardPolicy;
   accessPolicy: ContractDefinitionCardPolicy;
 
-  detailJsonObj: ContractDefinitionDto;
+  detailJsonObj: ContractDefinitionEntry;
 }
 
 export interface ContractDefinitionCardPolicy {
   policyDefinitionId: string;
-  policyDefinition: PolicyDefinition | null;
+  policyDefinition: PolicyDefinitionDto | null;
 }
 
 export interface ContractDefinitionCardCriterion {
@@ -27,6 +27,6 @@ export interface ContractDefinitionCardCriterionValue {
   type: 'string' | 'asset' | 'json';
   searchTargets: (string | null)[];
   value?: string;
-  asset?: Asset;
+  asset?: UiAssetMapped;
   json?: any;
 }

@@ -1,6 +1,7 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {PageEvent} from '@angular/material/paginator';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {filter, map, takeUntil} from 'rxjs/operators';
 import {Store} from '@ngxs/store';
@@ -50,13 +51,28 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     private assetDetailDialogService: AssetDetailDialogService,
     private brokerServerApiService: BrokerServerApiService,
     private store: Store,
+    private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(CatalogPage.Reset);
+    this.initializePage();
     this.startListeningToStore();
     this.startEmittingSearchText();
     this.startEmittingSortBy();
+  }
+
+  private initializePage() {
+    const endpoints = this.parseConnectorEndpoints(
+      this.route.snapshot.queryParams,
+    );
+    this.store.dispatch(new CatalogPage.Reset(endpoints));
+
+    if (endpoints.length) {
+      this.expandedFilterId = 'connectorEndpoint';
+      // remove query params from url
+      this.router.navigate([]);
+    }
   }
 
   private startListeningToStore() {
@@ -96,6 +112,14 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
           this.store.dispatch(new CatalogPage.UpdateSorting(value));
         }
       });
+  }
+
+  private parseConnectorEndpoints(params: Params): string[] {
+    if (!('connectorEndpoint' in params)) {
+      return [];
+    }
+    const endpoints = params.connectorEndpoint;
+    return Array.isArray(endpoints) ? [...new Set(endpoints)] : [endpoints];
   }
 
   onDataOfferClick(dataOffer: CatalogDataOfferMapped) {

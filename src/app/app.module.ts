@@ -27,9 +27,6 @@ import {
   API_KEY,
   CONNECTOR_DATAMANAGEMENT_API,
 } from './core/services/api/legacy-managent-api-client';
-import { appInitializerProviders } from './app-initializer'; // Import the initializer
-
-
 
 @NgModule({
   imports: [
@@ -60,7 +57,6 @@ import { appInitializerProviders } from './app-initializer'; // Import the initi
   declarations: [AppComponent, PageNotFoundComponent],
   providers: [
     provideAppConfig(),
-    appInitializerProviders,
 
     // Provide individual properties of config for better Angular Component APIs
     provideAppConfigProperty(CONNECTOR_DATAMANAGEMENT_API, 'managementApiUrl'),

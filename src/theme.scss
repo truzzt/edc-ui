@@ -58,4 +58,40 @@ mat-icon[mat-card-avatar],
   background-color: #202020;
   color: white;
   transition: background-color 0.3s;
+  margin: 10px !important; 
+  border-radius: 16px !important;
+}
+
+.mat-card-title {
+  font-size: 20px !important;
+  margin: 10px !important;
+}
+
+.mat-card-content {
+  margin: 10px !important;
+}
+
+.mat-typography-p {
+  margin: 10px !important;
+}
+
+.text-justify {
+  margin: 10px !important;
+}
+
+
+.mat-card-subtitle {
+  margin-left: 10px !important;
+}
+
+.mat-stroked-button {
+  margin-left: 10px !important;
+}
+
+.mat-button-base {
+  margin-left: 10px !important;
+}
+
+.mat-form-field-outline {
+  margin-left: 10px !important;
 }

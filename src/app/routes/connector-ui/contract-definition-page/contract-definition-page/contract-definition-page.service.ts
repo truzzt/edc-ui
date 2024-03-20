@@ -1,11 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Observable, combineLatest, of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {
-  ContractDefinitionService,
-  PolicyService,
-} from '../../../../core/services/api/legacy-managent-api-client';
-import {AssetServiceMapped} from '../../../../core/services/asset-service-mapped';
+import {EdcApiService} from '../../../../core/services/api/edc-api.service';
+import {AssetService} from '../../../../core/services/asset.service';
 import {Fetched} from '../../../../core/services/models/fetched';
 import {search} from '../../../../core/utils/search-utils';
 import {ContractDefinitionCard} from '../contract-definition-cards/contract-definition-card';
@@ -19,9 +16,8 @@ export interface ContractDefinitionList {
 @Injectable({providedIn: 'root'})
 export class ContractDefinitionPageService {
   constructor(
-    private contractDefinitionService: ContractDefinitionService,
-    private assetServiceMapped: AssetServiceMapped,
-    private policyService: PolicyService,
+    private edcApiService: EdcApiService,
+    private assetServiceMapped: AssetService,
     private contractDefinitionCardBuilder: ContractDefinitionCardBuilder,
   ) {}
 
@@ -56,17 +52,18 @@ export class ContractDefinitionPageService {
         .flatMap((it) => it.searchTargets),
     ]);
   }
-
+  //ed
   fetchCards(): Observable<Fetched<ContractDefinitionCard[]>> {
     return combineLatest([
-      this.contractDefinitionService.getAllContractDefinitions(0, 10_000_000),
+      this.edcApiService.getContractDefinitionPage(),
       this.assetServiceMapped.fetchAssets().pipe(
         catchError((err) => {
           console.warn('Failed fetching assets.', err);
           return of([]);
         }),
       ),
-      this.policyService.getAllPolicies(0, 10_000_000).pipe(
+      this.edcApiService.getPolicyDefinitionPage().pipe(
+        map((policyDefinitionPage) => policyDefinitionPage.policies),
         catchError((err) => {
           console.warn('Failed fetching policy definitions.', err);
           return of([]);

@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {switchDisabledControls} from '../../../../core/utils/form-group-utils';
-import {dateRangeRequired} from '../../../../core/validators/date-range-required';
-import {noWhitespaceValidator} from '../../../../core/validators/no-whitespace-validator';
+import {noWhitespacesOrColonsValidator} from '../../../../core/validators/no-whitespaces-or-colons-validator';
+import {validDateRange} from '../../../../core/validators/valid-date-range';
 import {
   NewPolicyDialogFormModel,
   NewPolicyDialogFormValue,
@@ -32,7 +32,7 @@ export class NewPolicyDialogForm {
   buildFormGroup(): FormGroup<NewPolicyDialogFormModel> {
     const newPolicyFormGroup: FormGroup<NewPolicyDialogFormModel> =
       this.formBuilder.nonNullable.group({
-        id: ['', [Validators.required, noWhitespaceValidator]],
+        id: ['', [Validators.required, noWhitespacesOrColonsValidator]],
         policyType: [
           'Connector-Restricted-Usage' as PolicyType,
           Validators.required,
@@ -42,9 +42,9 @@ export class NewPolicyDialogForm {
             start: null as Date | null,
             end: null as Date | null,
           },
-          {validators: dateRangeRequired},
+          {validators: validDateRange},
         ),
-        connectorId: ['', Validators.required],
+        participantIds: [new Array<string>(), Validators.required],
       });
 
     switchDisabledControls<NewPolicyDialogFormValue>(
@@ -59,7 +59,7 @@ export class NewPolicyDialogForm {
           id: true,
           policyType: true,
           range: timePeriodRestricted,
-          connectorId: connecterRestrictedUsage,
+          participantIds: connecterRestrictedUsage,
         };
       },
     );

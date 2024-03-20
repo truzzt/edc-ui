@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
-import {ContractDefinitionEditorDialogFormValue} from '../../routes/connector-ui/contract-definition-page/contract-definition-editor-dialog/contract-definition-editor-dialog-form-model';
 import {
-  ContractDefinitionDto,
-  policyDefinitionId,
-} from './api/legacy-managent-api-client';
-import {AssetProperties} from './asset-properties';
+  ContractDefinitionRequest,
+  UiCriterionLiteralType,
+} from '@sovity.de/edc-client';
+import {ContractDefinitionEditorDialogFormValue} from '../../routes/connector-ui/contract-definition-page/contract-definition-editor-dialog/contract-definition-editor-dialog-form-model';
+import {AssetProperty} from './models/asset-properties';
 
 @Injectable({
   providedIn: 'root',
@@ -18,16 +18,19 @@ export class ContractDefinitionBuilder {
    */
   buildContractDefinition(
     formValue: ContractDefinitionEditorDialogFormValue,
-  ): ContractDefinitionDto {
+  ): ContractDefinitionRequest {
     return {
-      id: formValue.id!.trim(),
-      accessPolicyId: policyDefinitionId(formValue.accessPolicy!),
-      contractPolicyId: policyDefinitionId(formValue.contractPolicy!),
-      criteria: [
+      contractDefinitionId: formValue.id ?? '',
+      accessPolicyId: formValue.accessPolicy!.policyDefinitionId,
+      contractPolicyId: formValue.contractPolicy!.policyDefinitionId,
+      assetSelector: [
         {
-          operandLeft: AssetProperties.id,
-          operator: 'in',
-          operandRight: formValue.assets!.map((it) => it.id),
+          operandLeft: AssetProperty.id,
+          operator: 'IN',
+          operandRight: {
+            type: UiCriterionLiteralType.ValueList,
+            valueList: formValue.assets!.map((it) => it.assetId),
+          },
         },
       ],
     };

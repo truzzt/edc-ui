@@ -8,15 +8,14 @@ import {
   distinctUntilChanged,
   sampleTime,
 } from 'rxjs';
-import {map} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
-import {AssetDetailDialogResult} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-result';
-import {AssetDetailDialogComponent} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.component';
-import {CatalogApiUrlService} from '../../../../core/services/api/catalog-api-url.service';
-import {ContractOffer} from '../../../../core/services/models/contract-offer';
+import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
+import {DataOffer} from '../../../../core/services/models/data-offer';
 import {value$} from '../../../../core/utils/form-group-utils';
 import {CatalogBrowserFetchDetailDialogComponent} from '../catalog-browser-fetch-detail-dialog/catalog-browser-fetch-detail-dialog.component';
 import {CatalogBrowserFetchDetailDialogData} from '../catalog-browser-fetch-detail-dialog/catalog-browser-fetch-detail-dialog.data';
+import {CatalogApiUrlService} from './catalog-api-url.service';
 import {CatalogBrowserPageService} from './catalog-browser-page-service';
 import {emptyCatalogBrowserPageData} from './catalog-browser-page.data';
 
@@ -35,6 +34,7 @@ export class CatalogBrowserPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private assetDetailDialogDataService: AssetDetailDialogDataService,
+    private assetDetailDialogService: AssetDetailDialogService,
     private catalogBrowserPageService: CatalogBrowserPageService,
     private catalogApiUrlService: CatalogApiUrlService,
     private matDialog: MatDialog,
@@ -53,15 +53,12 @@ export class CatalogBrowserPageComponent implements OnInit, OnDestroy {
     this.presetProvidersMessage = this.buildPresetCatalogUrlsMessage();
   }
 
-  onContractOfferClick(contractOffer: ContractOffer) {
-    const data =
-      this.assetDetailDialogDataService.contractOfferDetails(contractOffer);
-    const ref = this.matDialog.open(AssetDetailDialogComponent, {data});
-    ref.afterClosed().subscribe((result: AssetDetailDialogResult) => {
-      if (result?.refreshList) {
-        this.fetch$.next(null);
-      }
-    });
+  onDataOfferClick(dataOffer: DataOffer) {
+    const data = this.assetDetailDialogDataService.dataOfferDetails(dataOffer);
+    this.assetDetailDialogService
+      .open(data, this.ngOnDestroy$)
+      .pipe(filter((it) => !!it?.refreshList))
+      .subscribe(() => this.fetch$.next(null));
   }
 
   onShowFetchDetails() {

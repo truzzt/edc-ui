@@ -1,6 +1,7 @@
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
 import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatDialogModule} from '@angular/material/dialog';
@@ -21,12 +22,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {PageNotFoundComponent} from './component-library/error-404-component/page-not-found.component';
 import {provideAppConfig} from './core/config/app-config-initializer';
-import {provideAppConfigProperty} from './core/config/app-config-injection-utils';
 import {ApiKeyInterceptor} from './core/services/api/api-key.interceptor';
-import {
-  API_KEY,
-  CONNECTOR_DATAMANAGEMENT_API,
-} from './core/services/api/legacy-managent-api-client';
 
 @NgModule({
   imports: [
@@ -36,6 +32,7 @@ import {
     HttpClientModule,
     // Angular Material
     MatButtonModule,
+    MatCardModule,
     MatDatepickerModule,
     MatDialogModule,
     MatIconModule,
@@ -57,10 +54,6 @@ import {
   declarations: [AppComponent, PageNotFoundComponent],
   providers: [
     provideAppConfig(),
-
-    // Provide individual properties of config for better Angular Component APIs
-    provideAppConfigProperty(CONNECTOR_DATAMANAGEMENT_API, 'managementApiUrl'),
-    provideAppConfigProperty(API_KEY, 'managementApiKey'),
 
     {provide: HTTP_INTERCEPTORS, multi: true, useClass: ApiKeyInterceptor},
 

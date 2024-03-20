@@ -1,6 +1,6 @@
 import {FormControl, ɵFormGroupValue} from '@angular/forms';
-import {PolicyDefinition} from '../../../../core/services/api/legacy-managent-api-client';
-import {Asset} from '../../../../core/services/models/asset';
+import {PolicyDefinitionDto} from '@sovity.de/edc-client';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
 
 /**
  * Form Value Type
@@ -13,7 +13,7 @@ export type ContractDefinitionEditorDialogFormValue =
  */
 export interface ContractDefinitionEditorDialogFormModel {
   id: FormControl<string>;
-  accessPolicy: FormControl<PolicyDefinition | null>;
-  contractPolicy: FormControl<PolicyDefinition | null>;
-  assets: FormControl<Asset[]>;
+  accessPolicy: FormControl<PolicyDefinitionDto | null>;
+  contractPolicy: FormControl<PolicyDefinitionDto | null>;
+  assets: FormControl<UiAssetMapped[]>;
 }

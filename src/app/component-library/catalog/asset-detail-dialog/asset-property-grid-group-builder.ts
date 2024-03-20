@@ -1,90 +1,85 @@
 import {Injectable} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
 import {CatalogContractOffer} from '@sovity.de/broker-server-client';
+import {UiPolicy} from '@sovity.de/edc-client';
 import {ActiveFeatureSet} from '../../../core/config/active-feature-set';
-import {Policy} from '../../../core/services/api/legacy-managent-api-client';
-import {AssetProperties} from '../../../core/services/asset-properties';
-import {Asset} from '../../../core/services/models/asset';
-import {BrokerDataOffer} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
+import {UiAssetMapped} from '../../../core/services/models/ui-asset-mapped';
+import {ParticipantIdLocalization} from '../../../core/services/participant-id-localization';
+import {CatalogDataOfferMapped} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/catalog-page-result-mapped';
 import {ContractAgreementCardMapped} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
-import {JsonDialogComponent} from '../../json-dialog/json-dialog/json-dialog.component';
-import {JsonDialogData} from '../../json-dialog/json-dialog/json-dialog.data';
+import {JsonDialogService} from '../../json-dialog/json-dialog/json-dialog.service';
 import {PropertyGridGroup} from '../../property-grid/property-grid-group/property-grid-group';
 import {PropertyGridField} from '../../property-grid/property-grid/property-grid-field';
 import {PropertyGridFieldService} from '../../property-grid/property-grid/property-grid-field.service';
 import {formatDateAgo} from '../../ui-elements/ago/formatDateAgo';
+import {UrlListDialogService} from '../../url-list-dialog/url-list-dialog/url-list-dialog.service';
 import {
   getOnlineStatusColor,
   getOnlineStatusIcon,
 } from '../icon-with-online-status/online-status-utils';
-import {getLegacyPolicy} from './policy-utils';
+import {PolicyPropertyFieldBuilder} from './policy-property-field-builder';
 
 @Injectable()
 export class AssetPropertyGridGroupBuilder {
   constructor(
-    private matDialog: MatDialog,
+    private participantIdLocalization: ParticipantIdLocalization,
     private activeFeatureSet: ActiveFeatureSet,
     private propertyGridUtils: PropertyGridFieldService,
+    private jsonDialogService: JsonDialogService,
+    private urlListDialogService: UrlListDialogService,
+    private policyPropertyFieldBuilder: PolicyPropertyFieldBuilder,
   ) {}
 
   buildAssetPropertiesGroup(
-    asset: Asset,
+    asset: UiAssetMapped,
     groupLabel: string | null,
   ): PropertyGridGroup {
     const fields: PropertyGridField[] = [
       {
         icon: 'category',
         label: 'ID',
-        labelTitle: AssetProperties.id,
-        ...this.propertyGridUtils.guessValue(asset.id),
+        ...this.propertyGridUtils.guessValue(asset.assetId),
       },
       {
         icon: 'file_copy',
         label: 'Version',
-        labelTitle: AssetProperties.version,
         ...this.propertyGridUtils.guessValue(asset.version),
       },
       {
         icon: 'language',
         label: 'Language',
-        labelTitle: AssetProperties.language,
         ...this.propertyGridUtils.guessValue(asset.language?.label),
       },
       {
         icon: 'apartment',
         label: 'Publisher',
-        labelTitle: AssetProperties.publisher,
-        ...this.propertyGridUtils.guessValue(asset.publisher),
+        ...this.propertyGridUtils.guessValue(asset.publisherHomepage),
       },
       {
         icon: 'bookmarks',
         label: 'Endpoint Documentation',
-        labelTitle: AssetProperties.endpointDocumentation,
-        ...this.propertyGridUtils.guessValue(asset.endpointDocumentation),
+        ...this.propertyGridUtils.guessValue(asset.landingPageUrl),
       },
       {
         icon: 'gavel',
         label: 'Standard License',
-        labelTitle: AssetProperties.standardLicense,
-        ...this.propertyGridUtils.guessValue(asset.standardLicense),
-      },
-      this.buildConnectorEndpointField(asset.originator!!),
-      {
-        icon: 'account_circle',
-        label: 'Organization',
-        labelTitle: AssetProperties.originatorOrganization,
-        ...this.propertyGridUtils.guessValue(asset.originatorOrganization),
+        ...this.propertyGridUtils.guessValue(asset.licenseUrl),
       },
       {
         icon: 'category',
-        label: 'Content Type',
-        labelTitle: AssetProperties.contentType,
-        ...this.propertyGridUtils.guessValue(asset.contentType),
+        label: this.participantIdLocalization.participantId,
+        ...this.propertyGridUtils.guessValue(asset.participantId),
       },
+      {
+        icon: 'account_circle',
+        label: 'Organization',
+        ...this.propertyGridUtils.guessValue(asset.creatorOrganizationName),
+      },
+      this.buildConnectorEndpointField(asset.connectorEndpoint),
+      ...this.buildHttpDatasourceFields(asset),
     ];
 
     if (this.activeFeatureSet.hasMdsFields()) {
-      fields.push(...this.buildMdsProperties(asset, true));
+      fields.push(...this.buildMdsProperties(asset));
     }
 
     return {
@@ -93,15 +88,51 @@ export class AssetPropertyGridGroupBuilder {
     };
   }
 
-  buildAdditionalPropertiesGroup(asset: Asset): PropertyGridGroup {
+  private buildHttpDatasourceFields(asset: UiAssetMapped): PropertyGridField[] {
+    const fields: PropertyGridField[] = [];
+
+    const hints: {label: string; value: boolean | undefined}[] = [
+      {label: 'Method', value: asset.httpDatasourceHintsProxyMethod},
+      {label: 'Path', value: asset.httpDatasourceHintsProxyPath},
+      {label: 'Query Params', value: asset.httpDatasourceHintsProxyQueryParams},
+      {label: 'Body', value: asset.httpDatasourceHintsProxyBody},
+    ];
+
+    if (hints.some((hint) => hint.value != null)) {
+      const text = hints.some((hint) => hint.value)
+        ? hints
+            .filter((hint) => hint.value)
+            .map((hint) => hint.label)
+            .join(', ')
+        : 'Disabled';
+
+      fields.push({
+        icon: 'api',
+        label: 'HTTP Data Source Parameterization',
+        text,
+      });
+    }
+
+    if (asset.mediaType) {
+      fields.push({
+        icon: 'category',
+        label: 'Content Type',
+        ...this.propertyGridUtils.guessValue(asset.mediaType),
+      });
+    }
+
+    return fields;
+  }
+
+  buildAdditionalPropertiesGroup(asset: UiAssetMapped): PropertyGridGroup {
     const fields: PropertyGridField[] = [];
 
     if (!this.activeFeatureSet.hasMdsFields()) {
-      fields.push(...this.buildMdsProperties(asset, false));
+      fields.push(...this.buildMdsProperties(asset));
     }
 
     fields.push(
-      ...asset.additionalProperties.map((prop) => {
+      ...asset.mergedAdditionalProperties.map((prop) => {
         return {
           icon: 'category ',
           label: prop.key,
@@ -117,83 +148,124 @@ export class AssetPropertyGridGroupBuilder {
     };
   }
 
-  buildMdsProperties(asset: Asset, includeEmpty: boolean): PropertyGridField[] {
+  buildMdsProperties(asset: UiAssetMapped): PropertyGridField[] {
     const fields: PropertyGridField[] = [];
-    if (includeEmpty || asset.transportMode) {
+    if (asset.transportMode) {
       fields.push({
         icon: 'commute',
         label: 'Transport Mode',
-        labelTitle: AssetProperties.transportMode,
         ...this.propertyGridUtils.guessValue(asset.transportMode?.label),
       });
     }
-    if (includeEmpty || asset.dataCategory) {
+    if (asset.dataCategory) {
       fields.push({
         icon: 'commute',
         label: 'Data Category',
-        labelTitle: AssetProperties.dataCategory,
         ...this.propertyGridUtils.guessValue(asset.dataCategory?.label),
       });
     }
-    if (includeEmpty || asset.dataSubcategory) {
+    if (asset.dataSubcategory) {
       fields.push({
         icon: 'commute',
         label: 'Data Subcategory',
-        labelTitle: AssetProperties.dataSubcategory,
         ...this.propertyGridUtils.guessValue(asset.dataSubcategory?.label),
       });
     }
-    if (includeEmpty || asset.dataModel) {
+    if (asset.dataModel) {
       fields.push({
         icon: 'category',
         label: 'Data Model',
-        labelTitle: AssetProperties.dataModel,
         ...this.propertyGridUtils.guessValue(asset.dataModel),
       });
     }
-    if (includeEmpty || asset.geoReferenceMethod) {
+    if (asset.geoReferenceMethod) {
       fields.push({
         icon: 'commute',
         label: 'Geo Reference Method',
-        labelTitle: AssetProperties.geoReferenceMethod,
         ...this.propertyGridUtils.guessValue(asset.geoReferenceMethod),
+      });
+    }
+    if (asset.geoLocation) {
+      fields.push({
+        icon: 'location_on',
+        label: 'Geo Location',
+        ...this.propertyGridUtils.guessValue(asset.geoLocation),
+      });
+    }
+    if (asset.nutsLocation?.length) {
+      fields.push(this.buildNutsLocationsField(asset.nutsLocation));
+    }
+    if (asset.sovereignLegalName) {
+      fields.push({
+        icon: 'account_balance',
+        label: 'Sovereign',
+        ...this.propertyGridUtils.guessValue(asset.sovereignLegalName),
+      });
+    }
+    if (asset.dataSampleUrls?.length) {
+      fields.push(
+        this.buildDataSampleUrlsField(asset.dataSampleUrls, asset.title),
+      );
+    }
+    if (asset.referenceFileUrls?.length) {
+      fields.push(
+        this.buildReferenceFileUrlsField(
+          asset.referenceFileUrls,
+          asset.referenceFilesDescription,
+          asset.title,
+        ),
+      );
+    }
+    if (asset.conditionsForUse) {
+      fields.push({
+        icon: 'description',
+        label: 'Conditions For Use',
+        ...this.propertyGridUtils.guessValue(asset.conditionsForUse),
+      });
+    }
+    if (asset.dataUpdateFrequency) {
+      fields.push({
+        icon: 'timelapse',
+        label: 'Data Update Frequency',
+        ...this.propertyGridUtils.guessValue(asset.dataUpdateFrequency),
+      });
+    }
+    if (asset.temporalCoverageFrom || asset.temporalCoverageToInclusive) {
+      fields.push({
+        icon: 'today',
+        label: 'Temporal Coverage',
+        ...this.propertyGridUtils.guessValue(
+          this.buildTemporalCoverageString(
+            asset.temporalCoverageFrom,
+            asset.temporalCoverageToInclusive,
+          ),
+        ),
       });
     }
     return fields;
   }
 
-  onShowPolicyDetailsClick(
-    title: string,
-    subtitle: string,
-    policyDetails: Policy,
-  ) {
-    const data: JsonDialogData = {
-      title,
-      subtitle,
-      icon: 'policy',
-      objectForJson: policyDetails,
-    };
-    this.matDialog.open(JsonDialogComponent, {data});
-  }
-
-  buildContractOfferGroup(
-    asset: Asset,
+  buildBrokerContractOfferGroup(
+    asset: UiAssetMapped,
     contractOffer: CatalogContractOffer,
     i: number,
     total: number,
   ) {
     const groupLabel = `Contract Offer ${total > 1 ? i + 1 : ''}`;
-    let properties: PropertyGridField[] = [
+    const properties: PropertyGridField[] = [
       {
         icon: 'policy',
         label: 'Contract Policy',
         text: 'Show Policy Details',
         onclick: () =>
-          this.onShowPolicyDetailsClick(
-            `${groupLabel} Contract Policy)`,
-            asset.name,
-            getLegacyPolicy(contractOffer.contractPolicy),
-          ),
+          this.jsonDialogService.showJsonDetailDialog({
+            title: `${groupLabel} Contract Policy)`,
+            subtitle: asset.title,
+            icon: 'policy',
+            objectForJson: JSON.parse(
+              contractOffer.contractPolicy.policyJsonLd,
+            ),
+          }),
       },
       {
         icon: 'category',
@@ -211,36 +283,8 @@ export class AssetPropertyGridGroupBuilder {
     return {groupLabel, properties};
   }
 
-  buildPolicyGroup(
-    asset: Asset,
-    contractPolicy: Policy | null,
-    groupLabel: string = 'Policies',
-  ) {
-    let properties: PropertyGridField[] = [];
-    if (contractPolicy) {
-      properties.push(
-        this.buildContractPolicyField(contractPolicy, asset.name),
-      );
-    }
-    return {groupLabel, properties};
-  }
-
-  buildContractPolicyField(contractPolicy: Policy, subtitle: string) {
-    return {
-      icon: 'policy',
-      label: 'Contract Policy',
-      text: 'Show Policy Details',
-      onclick: () =>
-        this.onShowPolicyDetailsClick(
-          'Contract Policy',
-          subtitle,
-          contractPolicy,
-        ),
-    };
-  }
-
   buildContractAgreementGroup(contractAgreement: ContractAgreementCardMapped) {
-    let properties: PropertyGridField[] = [
+    const properties: PropertyGridField[] = [
       {
         icon: 'category',
         label: 'Signed',
@@ -251,43 +295,27 @@ export class AssetPropertyGridGroupBuilder {
         ),
       },
       {
-        icon: 'category',
-        label: 'Valid From',
-        ...this.propertyGridUtils.guessValue(
-          this.propertyGridUtils.formatDate(
-            contractAgreement.contractStartDate,
-          ),
-        ),
-      },
-      {
-        icon: 'category',
-        label: 'Valid To',
-        ...this.propertyGridUtils.guessValue(
-          this.propertyGridUtils.formatDate(contractAgreement.contractEndDate),
-        ),
-      },
-      {
         icon: 'policy',
         label: 'Direction',
         ...this.propertyGridUtils.guessValue(contractAgreement.direction),
-      },
-      {
-        icon: 'link',
-        label: 'Other Connector Endpoint',
-        ...this.propertyGridUtils.guessValue(
-          contractAgreement.counterPartyAddress,
-        ),
-      },
-      {
-        icon: 'link',
-        label: 'Other Connector ID',
-        ...this.propertyGridUtils.guessValue(contractAgreement.counterPartyId),
       },
       {
         icon: 'category',
         label: 'Contract Agreement ID',
         ...this.propertyGridUtils.guessValue(
           contractAgreement.contractAgreementId,
+        ),
+      },
+      {
+        icon: 'link',
+        label: `Counter-Party ${this.participantIdLocalization.participantId}`,
+        ...this.propertyGridUtils.guessValue(contractAgreement.counterPartyId),
+      },
+      {
+        icon: 'link',
+        label: 'Counter-Party Connector Endpoint',
+        ...this.propertyGridUtils.guessValue(
+          contractAgreement.counterPartyAddress,
         ),
       },
     ];
@@ -309,7 +337,23 @@ export class AssetPropertyGridGroupBuilder {
     };
   }
 
-  buildBrokerDataOfferGroup(dataOffer: BrokerDataOffer): PropertyGridGroup {
+  buildContractPolicyGroup(
+    contractPolicy: UiPolicy,
+    subtitle: string,
+  ): PropertyGridGroup {
+    return {
+      groupLabel: 'Contract Policy',
+      properties: this.policyPropertyFieldBuilder.buildPolicyPropertyFields(
+        contractPolicy,
+        'Contract Policy JSON-LD',
+        subtitle,
+      ),
+    };
+  }
+
+  buildBrokerDataOfferGroup(
+    dataOffer: CatalogDataOfferMapped,
+  ): PropertyGridGroup {
     const lastUpdate = formatDateAgo(
       dataOffer.connectorOfflineSinceOrLastUpdatedAt,
     );
@@ -350,8 +394,68 @@ export class AssetPropertyGridGroupBuilder {
     return {
       icon: 'link',
       label: 'Connector Endpoint',
-      labelTitle: AssetProperties.originator,
       ...this.propertyGridUtils.guessValue(endpoint),
     };
+  }
+
+  buildNutsLocationsField(locations: string[]): PropertyGridField {
+    return {
+      icon: 'location_on',
+      label: 'NUTS Locations',
+      text: locations.join(', '),
+    };
+  }
+
+  buildDataSampleUrlsField(
+    dataSampleUrls: string[],
+    title: string,
+  ): PropertyGridField {
+    return {
+      icon: 'attachment',
+      label: 'Data Samples',
+      text: 'Show Data Samples',
+      onclick: () =>
+        this.urlListDialogService.showUrlListDialog({
+          title: `Data Samples`,
+          subtitle: title,
+          icon: 'attachment',
+          urls: dataSampleUrls,
+        }),
+    };
+  }
+
+  buildReferenceFileUrlsField(
+    referenceFileUrls: string[],
+    description: string | undefined,
+    title: string,
+  ): PropertyGridField {
+    return {
+      icon: 'receipt',
+      label: 'Reference Files',
+      text: 'Show Reference Files',
+      onclick: () =>
+        this.urlListDialogService.showUrlListDialog({
+          title: `Reference Files`,
+          subtitle: title,
+          icon: 'receipt',
+          urls: referenceFileUrls,
+          description: description,
+        }),
+    };
+  }
+
+  buildTemporalCoverageString(
+    start: Date | undefined,
+    end: Date | undefined,
+  ): string {
+    if (!end) {
+      return `Start: ${start!.toLocaleDateString()}`;
+    }
+
+    if (!start) {
+      return `End: ${end.toLocaleDateString()}`;
+    }
+
+    return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
   }
 }

@@ -1,34 +1,38 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
+import {Subject} from 'rxjs';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
-import {AssetDetailDialogComponent} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.component';
-import {Asset} from '../../../../core/services/models/asset';
+import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
 
 @Component({
   selector: 'asset-select',
   templateUrl: './asset-select.component.html',
 })
-export class AssetSelectComponent {
+export class AssetSelectComponent implements OnDestroy {
   @Input()
   label!: string;
 
   @Input()
-  control!: FormControl<Asset[]>;
+  control!: FormControl<UiAssetMapped[]>;
 
   @Input()
-  assets: Asset[] = [];
+  assets: UiAssetMapped[] = [];
 
   constructor(
     private assetDetailDialogDataService: AssetDetailDialogDataService,
-    private matDialog: MatDialog,
+    private assetDetailDialogService: AssetDetailDialogService,
   ) {}
 
-  onAssetClick(asset: Asset) {
-    const data = this.assetDetailDialogDataService.assetDetails(asset, false);
-    this.matDialog.open(AssetDetailDialogComponent, {
-      data,
-      maxHeight: '90vh',
-    });
+  onAssetClick(asset: UiAssetMapped) {
+    const data = this.assetDetailDialogDataService.assetDetailsReadonly(asset);
+    this.assetDetailDialogService.open(data, this.ngOnDestroy$);
+  }
+
+  ngOnDestroy$ = new Subject();
+
+  ngOnDestroy() {
+    this.ngOnDestroy$.next(null);
+    this.ngOnDestroy$.complete();
   }
 }

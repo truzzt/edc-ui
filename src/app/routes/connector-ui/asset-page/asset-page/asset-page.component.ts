@@ -1,19 +1,17 @@
-import {Component, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {BehaviorSubject} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {BehaviorSubject, Subject, merge} from 'rxjs';
+import {filter, map, switchMap} from 'rxjs/operators';
+import {OnAssetEditClickFn} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
-import {AssetDetailDialogResult} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-result';
-import {AssetDetailDialogComponent} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.component';
-import {AssetService} from '../../../../core/services/api/legacy-managent-api-client';
-import {AssetPropertyMapper} from '../../../../core/services/asset-property-mapper';
-import {Asset} from '../../../../core/services/models/asset';
+import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
+import {AssetService} from '../../../../core/services/asset.service';
 import {Fetched} from '../../../../core/services/models/fetched';
-import {AssetCreateDialogResult} from '../asset-create-dialog/asset-create-dialog-result';
-import {AssetCreateDialogComponent} from '../asset-create-dialog/asset-create-dialog.component';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
+import {filterNotNull} from '../../../../core/utils/rxjs-utils';
+import {AssetEditDialogService} from '../asset-edit-dialog/asset-edit-dialog.service';
 
 export interface AssetList {
-  filteredAssets: Asset[];
+  filteredAssets: UiAssetMapped[];
   numTotalAssets: number;
 }
 
@@ -22,40 +20,38 @@ export interface AssetList {
   templateUrl: './asset-page.component.html',
   styleUrls: ['./asset-page.component.scss'],
 })
-export class AssetPageComponent implements OnInit {
+export class AssetPageComponent implements OnInit, OnDestroy {
   assetList: Fetched<AssetList> = Fetched.empty();
+  assetListUpdater$ = new Subject<UiAssetMapped[]>();
   searchText = '';
   private fetch$ = new BehaviorSubject(null);
 
   constructor(
+    private assetServiceMapped: AssetService,
+    private assetEditDialogService: AssetEditDialogService,
     private assetDetailDialogDataService: AssetDetailDialogDataService,
-    private assetService: AssetService,
-    private dialog: MatDialog,
-    private assetPropertyMapper: AssetPropertyMapper,
+    private assetDetailDialogService: AssetDetailDialogService,
   ) {}
 
   ngOnInit(): void {
-    this.fetch$
-      .pipe(
-        switchMap(() => {
-          return this.assetService.getAllAssets(0, 10_000_000).pipe(
-            map(
-              (assets): AssetList => ({
-                filteredAssets: assets
-                  .map((asset) =>
-                    this.assetPropertyMapper.buildAssetFromProperties(
-                      asset.properties,
-                    ),
-                  )
-                  .filter((asset) => asset.name?.includes(this.searchText)),
-                numTotalAssets: assets.length,
-              }),
-            ),
-            Fetched.wrap({
-              failureMessage: 'Failed fetching asset list.',
-            }),
-          );
+    merge(
+      this.fetch$.pipe(
+        switchMap(() => this.assetServiceMapped.fetchAssets()),
+        Fetched.wrap({
+          failureMessage: 'Failed fetching asset list.',
         }),
+      ),
+      this.assetListUpdater$.pipe(map(Fetched.ready)),
+    )
+      .pipe(
+        Fetched.map(
+          (assets): AssetList => ({
+            filteredAssets: assets.filter((asset) =>
+              asset.title?.includes(this.searchText),
+            ),
+            numTotalAssets: assets.length,
+          }),
+        ),
       )
       .subscribe((assetList) => (this.assetList = assetList));
   }
@@ -65,28 +61,45 @@ export class AssetPageComponent implements OnInit {
   }
 
   onCreate() {
-    const ref = this.dialog.open(AssetCreateDialogComponent);
-    ref.afterClosed().subscribe((result: AssetCreateDialogResult) => {
-      if (result?.refreshList) {
-        this.refresh();
-      }
-    });
+    this.assetEditDialogService
+      .showCreateDialog(this.ngOnDestroy$)
+      .subscribe((result) => {
+        if (result?.refreshedList) {
+          this.assetListUpdater$.next(result.refreshedList);
+        }
+      });
   }
 
-  onAssetClick(asset: Asset) {
-    const data = this.assetDetailDialogDataService.assetDetails(asset, true);
-    const ref = this.dialog.open(AssetDetailDialogComponent, {
-      data,
-      maxHeight: '90vh',
-    });
-    ref.afterClosed().subscribe((result: AssetDetailDialogResult) => {
-      if (result?.refreshList) {
-        this.refresh();
-      }
-    });
+  onAssetClick(asset: UiAssetMapped) {
+    const onAssetEditClick: OnAssetEditClickFn = (asset, onAssetUpdated) => {
+      this.assetEditDialogService
+        .showEditDialog(asset, this.ngOnDestroy$)
+        .pipe(filterNotNull())
+        .subscribe((result) => {
+          this.assetListUpdater$.next(result.refreshedList);
+          onAssetUpdated(buildDialogData(result.asset));
+        });
+    };
+
+    const buildDialogData = (asset: UiAssetMapped) =>
+      this.assetDetailDialogDataService.assetDetailsEditable(asset, {
+        onAssetEditClick,
+      });
+
+    const data = buildDialogData(asset);
+    this.assetDetailDialogService
+      .open(data, this.ngOnDestroy$)
+      .pipe(filter((it) => !!it?.refreshList))
+      .subscribe(() => this.refresh());
   }
 
   private refresh() {
     this.fetch$.next(null);
+  }
+
+  ngOnDestroy$ = new Subject();
+  ngOnDestroy() {
+    this.ngOnDestroy$.next(null);
+    this.ngOnDestroy$.complete();
   }
 }

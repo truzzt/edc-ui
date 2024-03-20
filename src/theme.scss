@@ -42,9 +42,56 @@ $custom-typography: mat.define-typography-config($font-family: 'Montserrat');
   background: #0F0F0F;
   display: none;
 }
+// Fix Icon sizes used in card avatars
+mat-icon[mat-card-avatar],
+.mat-card-avatar-icon {
+  font-size: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  margin-top: 1px;
+  margin-right: -3px;
+  margin-left: 2px;
+}
 
 .mat-card {  
   background-color: #202020;
   color: white;
   transition: background-color 0.3s;
+  margin: 10px !important; 
+  border-radius: 16px !important;
+}
+
+.mat-card-title {
+  font-size: 20px !important;
+  margin: 10px !important;
+}
+
+.mat-card-content {
+  margin: 10px !important;
+}
+
+.mat-typography-p {
+  margin: 10px !important;
+}
+
+.text-justify {
+  margin: 10px !important;
+}
+
+
+.mat-card-subtitle {
+  margin-left: 10px !important;
+}
+
+.mat-stroked-button {
+  margin-left: 10px !important;
+}
+
+.mat-button-base {
+  margin-left: 10px !important;
+}
+
+.mat-form-field-outline {
+  margin-left: 10px !important;
 }

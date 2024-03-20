@@ -1,29 +1,21 @@
 import {Injectable} from '@angular/core';
-import {
-  CatalogDataOffer,
-  CatalogPageResult,
-} from '@sovity.de/broker-server-client';
-import {AssetPropertyMapper} from '../../../../../core/services/asset-property-mapper';
-import {BrokerCatalogPageResult} from './broker-catalog-page-result';
-import {BrokerDataOffer} from './broker-data-offer';
+import {CatalogPageResult} from '@sovity.de/broker-server-client';
+import {AssetBuilder} from '../../../../../core/services/asset-builder';
+import {CatalogPageResultMapped} from './catalog-page-result-mapped';
 
 @Injectable({providedIn: 'root'})
 export class BrokerCatalogMapper {
-  constructor(private assetPropertyMapper: AssetPropertyMapper) {}
+  constructor(private assetBuilder: AssetBuilder) {}
 
-  buildUiCatalogPageResult(data: CatalogPageResult): BrokerCatalogPageResult {
+  buildCatalogPageResultMapped(
+    data: CatalogPageResult,
+  ): CatalogPageResultMapped {
     return {
       ...data,
-      dataOffers: data.dataOffers.map((offer) => this.buildUiDataOffer(offer)),
-    };
-  }
-
-  private buildUiDataOffer(offer: CatalogDataOffer): BrokerDataOffer {
-    return {
-      ...offer,
-      asset: this.assetPropertyMapper.buildAssetFromProperties(
-        offer.properties,
-      ),
+      dataOffers: data.dataOffers.map((offer) => ({
+        ...offer,
+        asset: this.assetBuilder.buildAsset(offer.asset),
+      })),
     };
   }
 }

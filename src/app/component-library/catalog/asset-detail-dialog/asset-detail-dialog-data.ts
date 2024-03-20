@@ -1,19 +1,29 @@
-import {Asset} from 'src/app/core/services/models/asset';
-import {ContractOffer} from '../../../core/services/models/contract-offer';
-import {BrokerDataOffer} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/broker-data-offer';
+import {UiAssetMapped} from 'src/app/core/services/models/ui-asset-mapped';
+import {DataOffer} from '../../../core/services/models/data-offer';
+import {CatalogDataOfferMapped} from '../../../routes/broker-ui/catalog-page/catalog-page/mapping/catalog-page-result-mapped';
 import {ContractAgreementCardMapped} from '../../../routes/connector-ui/contract-agreement-page/contract-agreement-cards/contract-agreement-card-mapped';
 import {PropertyGridGroup} from '../../property-grid/property-grid-group/property-grid-group';
 
 export interface AssetDetailDialogData {
   type:
     | 'asset-details'
-    | 'contract-offer'
+    | 'data-offer'
     | 'contract-agreement'
     | 'broker-data-offer';
   propertyGridGroups: PropertyGridGroup[];
-  asset: Asset;
-  contractOffer?: ContractOffer;
+  asset: UiAssetMapped;
+  dataOffer?: DataOffer;
   contractAgreement?: ContractAgreementCardMapped;
-  brokerDataOffer?: BrokerDataOffer;
+  brokerDataOffer?: CatalogDataOfferMapped;
   showDeleteButton?: boolean;
+  showEditButton?: boolean;
+  onAssetEditClick?: OnAssetEditClickFn;
 }
+
+export type OnAssetEditClickFn = (
+  asset: UiAssetMapped,
+  /**
+   * Required so that after the editing the detail dialog can be updated again
+   */
+  afterEditCb: (updatedDialogData: AssetDetailDialogData) => void,
+) => void;

@@ -3,23 +3,20 @@ import {
   EventEmitter,
   HostBinding,
   Input,
+  OnDestroy,
   Output,
 } from '@angular/core';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {EMPTY} from 'rxjs';
-import {catchError, filter, map, tap} from 'rxjs/operators';
+import {EMPTY, Subject} from 'rxjs';
+import {catchError, filter, tap} from 'rxjs/operators';
+import {PolicyDefinitionDto} from '@sovity.de/edc-client';
 import {AssetDetailDialogDataService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-data.service';
-import {AssetDetailDialogResult} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog-result';
-import {AssetDetailDialogComponent} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.component';
+import {AssetDetailDialogService} from '../../../../component-library/catalog/asset-detail-dialog/asset-detail-dialog.service';
 import {ConfirmDialogModel} from '../../../../component-library/confirmation-dialog/confirmation-dialog/confirmation-dialog.component';
 import {JsonDialogComponent} from '../../../../component-library/json-dialog/json-dialog/json-dialog.component';
 import {JsonDialogData} from '../../../../component-library/json-dialog/json-dialog/json-dialog.data';
-import {
-  ContractDefinitionService,
-  PolicyDefinition,
-  policyDefinitionId,
-} from '../../../../core/services/api/legacy-managent-api-client';
-import {Asset} from '../../../../core/services/models/asset';
+import {EdcApiService} from '../../../../core/services/api/edc-api.service';
+import {UiAssetMapped} from '../../../../core/services/models/ui-asset-mapped';
 import {NotificationService} from '../../../../core/services/notification.service';
 import {ContractDefinitionCard} from './contract-definition-card';
 
@@ -27,7 +24,7 @@ import {ContractDefinitionCard} from './contract-definition-card';
   selector: 'contract-definition-cards',
   templateUrl: './contract-definition-cards.component.html',
 })
-export class ContractDefinitionCardsComponent {
+export class ContractDefinitionCardsComponent implements OnDestroy {
   @HostBinding('class.flex')
   @HostBinding('class.flex-wrap')
   @HostBinding('class.gap-[10px]')
@@ -43,34 +40,28 @@ export class ContractDefinitionCardsComponent {
   deleteDone = new EventEmitter();
 
   constructor(
+    private edcApiService: EdcApiService,
     private assetDetailDialogDataService: AssetDetailDialogDataService,
+    private assetDetailDialogService: AssetDetailDialogService,
     private matDialog: MatDialog,
-    private contractDefinitionService: ContractDefinitionService,
     private notificationService: NotificationService,
   ) {}
 
-  onPolicyClick(policyDefinition: PolicyDefinition) {
+  onPolicyClick(policyDefinition: PolicyDefinitionDto) {
     const data: JsonDialogData = {
-      title: policyDefinitionId(policyDefinition),
+      title: policyDefinition.policyDefinitionId,
       subtitle: 'Policy',
       icon: 'policy',
-      objectForJson: policyDefinition,
+      objectForJson: JSON.parse(policyDefinition.policy.policyJsonLd),
     };
     this.matDialog.open(JsonDialogComponent, {data});
   }
 
-  onAssetClick(asset: Asset) {
-    const data = this.assetDetailDialogDataService.assetDetails(asset, false);
-    const ref = this.matDialog.open(AssetDetailDialogComponent, {
-      data,
-      maxHeight: '90vh',
-    });
-    ref
-      .afterClosed()
-      .pipe(
-        map((it) => it as AssetDetailDialogResult | null),
-        filter((it) => !!it?.refreshList),
-      )
+  onAssetClick(asset: UiAssetMapped) {
+    const data = this.assetDetailDialogDataService.assetDetailsReadonly(asset);
+    this.assetDetailDialogService
+      .open(data, this.ngOnDestroy$)
+      .pipe(filter((it) => !!it?.refreshList))
       .subscribe(() => this.deleteDone.emit());
   }
 
@@ -81,15 +72,15 @@ export class ContractDefinitionCardsComponent {
       subtitle: 'Contract Definition',
       icon: 'policy',
       objectForJson: card.detailJsonObj,
-      actionButton: {
+      toolbarButton: {
         text: 'Delete',
-        color: 'warn',
+        icon: 'delete',
         confirmation: ConfirmDialogModel.forDelete(
           'contract definition',
           card.id,
         ),
         action: () =>
-          this.contractDefinitionService.deleteContractDefinition(card.id).pipe(
+          this.edcApiService.deleteContractDefinition(card.id).pipe(
             tap(() => {
               this.notificationService.showInfo('Contract Definition deleted!');
               this.deleteDone.emit();
@@ -106,5 +97,12 @@ export class ContractDefinitionCardsComponent {
     };
 
     dialogRef = this.matDialog.open(JsonDialogComponent, {data});
+  }
+
+  ngOnDestroy$ = new Subject();
+
+  ngOnDestroy() {
+    this.ngOnDestroy$.next(null);
+    this.ngOnDestroy$.complete();
   }
 }
